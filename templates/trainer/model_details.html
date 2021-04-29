@@ -1,0 +1,43 @@
+
+
+
+{% extends "base.html" %}
+
+{% load crispy_forms_tags %}
+
+
+
+{% block content %}
+
+  <div class="d-flex flex-column align-items-md-center justify-content-center w-75 p-3">
+   <form method="post" >
+    {% csrf_token %}
+
+
+      <div  class="d-md-inline-flex justify-content-between">
+       <h4 class="mr-3">Status: </h4>
+        {% if model.model_running %}
+
+          <h4><span class="badge badge-success">RUNNING</span></h4>
+        {% else %}
+          <h4><span class="badge badge-dark">STOPPED</span></h4>
+
+        {% endif %}
+
+      </div>
+      
+
+      {% crispy form %}
+        <div  class="d-md-inline-flex justify-content-end">
+     
+          <a href="{% url 'models' %}">Cancel</a>
+        </div>
+    </div>
+
+
+
+   
+{% endblock %}
+
+
+

@@ -1,0 +1,51 @@
+
+{% extends "base.html" %}
+
+
+
+{% block content %}
+  
+  <div class="d-flex justify-content-center align-items-center m-3">
+    <div class="d-flex flex-column justify-content-center">
+      <div class="d-flex flex-row mb-2">
+        <a href="{% url 'createModel' %}"  class="btn btn-sm btn-outline-secondary" >Create Model</a>
+      </div>
+      <div>
+        <table   class="table">
+          <thead class="thead-dark">
+            <tr>
+              <th>Name</th>
+              <th>Default</th>
+              <th>Accuracy</th>
+              <th>Status</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for model in model_list %}
+              <tr>
+                <td><a href="{% url 'view_model_details' model.pk %}">{{ model.model_name }}</a></td>
+                <td>{{ model.set_as_default }}</td>
+              
+                <td>{{ model.accuracy_precision }}</td>
+                  {% if model.model_running %}
+                    <td><h4><span class="badge badge-success">RUNNING</span></h4></td>
+                    <td><a href="{% url 'stopModel' model.pk %}">STOP</a></td>
+
+                  {% else %}
+                    <td><h4><span class="badge badge-dark">STOPPED</span></h4></td>
+                    <td><a href="{% url 'start_certstream_task' model.pk %}">START</a></td>
+                  {% endif %}
+              </tr>
+            {% empty %}
+              <tr class="table-active">
+                <td colspan="3">No data</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+</div>
+{% endblock %}
+

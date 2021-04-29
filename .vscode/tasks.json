@@ -1,0 +1,33 @@
+{
+    // See https://go.microsoft.com/fwlink/?LinkId=733558
+    // for the documentation about the tasks.json format
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "startServer",
+            "type": "shell",
+            "command": "python manage.py runserver",
+            "problemMatcher": []
+        },
+        {
+            "label": "make migrations",
+            "type": "shell",
+            "command": [
+                "python manage.py makemigrations"
+            ],
+            "problemMatcher": [],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
+        },
+        {
+            "label": "migrate db",
+            "type": "shell",
+            "command": [
+                "python manage.py migrate"
+            ],
+            "problemMatcher": []
+        }
+    ]
+}
