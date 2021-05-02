@@ -59,13 +59,14 @@ class Trainer:
 
         self.package_model()
     
+    
     def __str__ (self):
         return self.modelDetails
 
     def __unicode__ (self):
         return self.modelDetails
 
-
+    #Convert to class method
     def train_model (self):
         """
         Train the model with the attributes and labels generated from training set.
@@ -81,7 +82,7 @@ class Trainer:
         self.fqdnArr = numpy.fromiter( [fqdn.get_type_as_int() for fqdn in self.fqdnList], dtype=numpy.float) 
          
         
-
+        # construct a dataframe of the attributes and normalized values
         attributeDf = DataFrame.from_records(self.trainingAttributes['values'], columns=self.trainingAttributes['names'])
         self.attributeVectors = self.trainingAttributes['names']
 
@@ -92,7 +93,7 @@ class Trainer:
 
         #train the model
         self.model = LogisticRegression(C=10).fit(self._x_train, self._y_train)
-
+        
       
 
         
@@ -145,7 +146,7 @@ class Trainer:
 
 
     def package_model (self):
-       # from psycopg2 import sql,Binary
+   
         from trainer.models import Model as trainerModel
 
         m = trainerModel(
@@ -202,7 +203,7 @@ class AttributeManager:
         self.trainer_keyword = {kw.id:kw.keyword for kw in KeyWord.objects.all()}
         self.trainer_squatedword = [sw.squated_word for sw in SquatedWord.objects.all()]
       
-        # To-Do: Set the Predictor class to inherent the database class or figure out a more pythonic way of doing this. 
+     
         
     def compute_attributes (self,fqdnList,speed=False):
 
@@ -210,13 +211,12 @@ class AttributeManager:
         result = {}
         attributes = []
 
-
        
         for fqdn in fqdnList:
 
             analysis = OrderedDict()
             for item in dir(self):
-           
+                
                 if item.startswith('att_'):
                     analysisType = getattr(self,item)
                     result = analysisType(fqdn)

@@ -19,7 +19,7 @@ class Tag (models.Model):
         return self.tag
 
 
-# Create your models here.
+
 class Brand(models.Model):
     """A Model used to define the brand names to be monitored for typo-squating"""
     brand_name = models.CharField(max_length=200)

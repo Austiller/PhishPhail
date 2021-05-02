@@ -5,13 +5,14 @@ from background_task import background
 from .models import FQDN,Model
 from trainer.trainer import AttributeManager,Trainer
 from trainer.forms import ModelForm,  ModelDetails, ModelEdit
-from trainer.models import Model
+from trainer.models import Model, FQDNInstance 
 from .forms import ModelForm
+
 
 @background(name="Train_Model")
 def train_model(modelName,model_id):
     # Get all FQDNs for training
-    print("Training Model")
+  
     t = Trainer(name=modelName,model_id=model_id)
     
     return 1
@@ -44,6 +45,25 @@ class ModelCreateView (CreateView):
     def get_success_url(self):
         return reverse_lazy('models')  
 
+class FQDNInstanceListView(ListView):
+    model = FQDNInstance
+    paginate_by = 200
+    context_object_name = 'fqdn_list'
+   
+
+
+class FQDNInstanceDetails (UpdateView):
+    """
+
+        This function checks to see if the model can be run. If not it returns a message stating as such and steps the user can take. 
+
+
+    """
+
+    model = FQDNInstance
+    
+    template_name = 'trainer/fqdn_details.html'
+
 
 
 class ModelUpdateView(UpdateView):
@@ -57,6 +77,8 @@ class ModelUpdateView(UpdateView):
 
 def homeView(request):
     context = {}
+    
+
     return render(request, 'home.html')
 
 def splashPage(request):
@@ -73,7 +95,14 @@ class ModelListView (ListView):
     model = Model
     context_object_name = 'model_list'
 
- 
+    def get_context_data (self,**kwargs):
+        context  = {}
+        context['model_list'] = Model.objects.all()
+        return context
+
+
+
+
 class ModelDetails (UpdateView):
     """
 
@@ -91,14 +120,13 @@ class ModelDetails (UpdateView):
         model = form.save(commit=False)
         request = self.request
 
-        
-        
         model_id = model.id
         return HttpResponseRedirect(self.get_success_url(model_id))
 
 
     def get_success_url(self,model_id):
         return reverse('modelEdit', args=[model_id])
+
 
 
 
@@ -116,10 +144,10 @@ class ModelEdit (UpdateView):
 
     #If the form is valid, pass the primary key referencing the model to be executed. 
     def form_valid(self, form):
-        model = form.save(commit=False)
+        model = form.save(commit=True)
         request = self.request
 
-        return render(request,"home.html")
+        return HttpResponseRedirect(reverse('models'))
 
 
     def get_success_url(self):
