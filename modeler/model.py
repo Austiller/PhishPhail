@@ -49,13 +49,13 @@ class Fqdn:
         self.tld = self.fqdnParts.suffix
         self.score = score
 
-    def get_type_as_int (self): -> int
+    def get_type_as_int (self)-> int: 
         if(self.fqdn_type.startswith('m')):
             return 1
         else:
             return 0
         
-    def clean_fqdn (self,fqdn): -> str
+    def clean_fqdn (self,fqdn)-> str: 
         """ 
         Takes the provided FQDN and removes common subdomains.
 
