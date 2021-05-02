@@ -160,10 +160,11 @@ class FQDNInstance(models.Model):
 
     # If the domain of the FQDN matches a tracked brand
     matched_brands = models.ManyToManyField(Brand)
-
+    
     matched_keywords =  models.ManyToManyField(KeyWord)
 
     # If the subdomain of the FQDN matches a tracked brand
+
     #brand_subdomain_match = models.ForeignKey(Brand)
 
     # The date which the FQDN was seen

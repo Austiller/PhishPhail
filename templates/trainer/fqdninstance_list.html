@@ -6,7 +6,7 @@
 {% block content %}
   
   <div class="d-flex justify-content-center align-items-center m-3">
-    <div class="d-flex flex-column justify-content-center">
+    <div class="d-flex flex-column justify-content-center align-items-center">
 
       <div>
         <table   class="table">
@@ -24,7 +24,6 @@
               <tr>
                 <td><a href="{% url 'view_fqdn_details' fqdn.pk %}">{{ fqdn.fqdn_full }}</a></td>
                 <td>{{ fqdn.score }}</td>
-              
                 <td>{{ fqdn.fqdn_type }}</td>
                 <td>{{ fqdn.fqdn_domain }}</td>
                 <td>{{ fqdn.fqdn_subdomain }}</td>
@@ -38,25 +37,29 @@
         </table>
 
       </div>
-    <div class="pagination">
+        <div class="pagination">
         <span class="step-links">
-            {% if fqdn_list.has_previous %}
-                <a href="?page=1">&laquo; first</a>
-                <a href="?page={{ fqdn_list.previous_page_number }}">previous</a>
+            {% if page_obj.has_previous %}
+                <a href="?page=1">&laquo; First </a>
+                <a href="?page={{ page_obj.previous_page_number }}"> Previous </a>
             {% endif %}
 
             <span class="current">
-                Page {{ fqdn_list.number }} of {{ fqdn_list.paginator.num_pages }}.
+                Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
             </span>
 
-            {% if fqdn_list.has_next %}
-                <a href="?page={{ fqdn_list.next_page_number }}">next</a>
-                <a href="?page={{ fqdn_list.paginator.num_pages }}">last &raquo;</a>
+            {% if page_obj.has_next %}
+                <a href="?page={{ page_obj.next_page_number }}"> Next </a>
+                <a href="?page={{ page_obj.paginator.num_pages }}"> Last &raquo;</a>
             {% endif %}
             </span>
         </div>
 
-    </div>
+    </div>  
+    
+    
 </div>
+
+
 {% endblock %}
 

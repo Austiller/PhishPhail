@@ -1,7 +1,7 @@
 from django.shortcuts import render, HttpResponse, get_object_or_404,reverse,HttpResponseRedirect
 from django.http import JsonResponse
 from django.urls import reverse_lazy
-from django.views.generic import ListView, CreateView, UpdateView
+from django.views.generic import ListView, CreateView, UpdateView, DetailView
 # Create your views here.
 from background_task import background
 from modeler.forms import  ExecuteModel
@@ -46,6 +46,9 @@ def clear_stuff():
     CompletedTask.objects.all().delete()
 
 
+
+
+
 def startModel (request, pk):
     context = {}
     #Trigger 
@@ -66,7 +69,7 @@ def startModel (request, pk):
     for m in Model.objects.exclude(id=mpk):
         m.model_running = False
         m.save()
-    
+        
 
     #start_certstream_task(model.id)
 

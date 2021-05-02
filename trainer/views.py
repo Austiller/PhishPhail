@@ -1,11 +1,11 @@
 from django.shortcuts import render, HttpResponse, get_object_or_404, HttpResponseRedirect
 from django.urls import reverse_lazy, reverse
-from django.views.generic import ListView, CreateView, UpdateView
+from django.views.generic import ListView, CreateView, UpdateView,DetailView
 from background_task import background
 from .models import FQDN,Model
 from trainer.trainer import AttributeManager,Trainer
 from trainer.forms import ModelForm,  ModelDetails, ModelEdit
-from trainer.models import Model, FQDNInstance 
+from trainer.models import Model, FQDNInstance, KeyWord 
 from .forms import ModelForm
 
 
@@ -47,28 +47,26 @@ class ModelCreateView (CreateView):
 
 class FQDNInstanceListView(ListView):
     model = FQDNInstance
-    paginate_by = 200
-    context_object_name = 'fqdn_list'
-    
+    paginate_by = 100
+   # context_object_name = 'fqdn_list'
+    def get_context_data (self,**kwargs):
+        context  = {}
+        context['fqdn_list'] = FQDNInstance.objects.all().filter(score__gte=0.5)
+        return context
 
+def fqdninstance_details (request,pk):
+    context = {}
+    context['fqdn'] = FQDNInstance.objects.get(pk=pk)
+    context['keywords'] = []
+    for kw in context['fqdn'].matched_keywords.all():
+        context['keywords'].append(kw.keyword)
+        print(context)
+    return render(request,'trainer/fqdninstance_detail.html',context)
 
-class FQDNInstanceDetails (UpdateView):
-    """
-
-        This function checks to see if the model can be run. If not it returns a message stating as such and steps the user can take. 
-
-
-    """
-
-    model = FQDNInstance
-    
-    template_name = 'trainer/fqdn_details.html'
 
 
 
 class ModelUpdateView(UpdateView):
-
-
     model = Model
     form_class = ModelForm
     template_name = 'trainer/model_form.html'
@@ -77,14 +75,7 @@ class ModelUpdateView(UpdateView):
 
 def homeView(request):
     context = {}
-    
-
     return render(request, 'home.html')
-
-def splashPage(request):
-    context = {}
-
-    return render(request, 'splash.html')
 
 
 def trainerSettings(request):
@@ -99,34 +90,6 @@ class ModelListView (ListView):
         context  = {}
         context['model_list'] = Model.objects.all()
         return context
-
-
-
-
-class ModelDetails (UpdateView):
-    """
-
-        This function checks to see if the model can be run. If not it returns a message stating as such and steps the user can take. 
-
-
-    """
-
-    model = Model
-    form_class = ModelDetails
-    template_name = 'trainer/model_details.html'
-
-    #If the form is valid, pass the primary key referencing the model to be executed. 
-    def form_valid(self, form):
-        model = form.save(commit=False)
-        request = self.request
-
-        model_id = model.id
-        return HttpResponseRedirect(self.get_success_url(model_id))
-
-
-    def get_success_url(self,model_id):
-        return reverse('modelEdit', args=[model_id])
-
 
 
 

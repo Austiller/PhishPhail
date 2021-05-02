@@ -17,14 +17,13 @@ from django.contrib import admin
 from django.urls import path, include
 from django.conf.urls import url
 
-from trainer.views import ModelCreateView, trainerSettings, homeView, splashPage, FQDNInstanceListView
+from trainer.views import ModelCreateView, trainerSettings, homeView,  FQDNInstanceListView
 
 
 urlpatterns = [
     url(r'^$', FQDNInstanceListView.as_view(), name='home'),
-    url('phishPhail/', splashPage, name='phishPhail'),
-    path('admin/', admin.site.urls),
+    path('^admin/',  admin.site.urls),
     path('trainer/', include('trainer.urls')),
-    path('models/', include('modeler.urls')),
+    path('models/', include('modeler.urls'))
 
 ]
