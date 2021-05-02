@@ -49,7 +49,7 @@ class FQDNInstanceListView(ListView):
     model = FQDNInstance
     paginate_by = 200
     context_object_name = 'fqdn_list'
-   
+    
 
 
 class FQDNInstanceDetails (UpdateView):
