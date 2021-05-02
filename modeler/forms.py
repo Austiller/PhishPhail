@@ -22,7 +22,7 @@ class ExecuteModel(forms.ModelForm):
     read_only_fields = ['model_running', 'model_algorithm','accuracy_precision','accuracy_recall','accuracy_training_set']
 
 
-    def clean_model_name(self): -> str
+    def clean_model_name(self) -> str:
         """Santize the user input for the model name."""
         name = self.cleaned_data['model_name']
         
