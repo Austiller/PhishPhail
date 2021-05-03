@@ -33,6 +33,31 @@ class ModelForm(forms.ModelForm):
         self.helper.add_input(Submit('submit', 'Save Model'))
 
 
+
+class FQDNInstance(forms.ModelForm):
+    """Using the Django Form helper to build a form for the model"""
+
+    def clean_model_name(self):
+        """Santize the user input for the model name."""
+        name = self.cleaned_data['model_name']
+        #Add Description Field.
+        return name
+
+    class Meta:
+        model = Model
+        fields = ('model_name', 'model_description','set_as_default')
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.helper = FormHelper()
+    
+
+        #self.helper.fields['accuracy_training_set'].widget.attrs['readyonly'] = True
+        self.helper.form_method = 'POST'
+        self.helper.add_input(Submit('submit', 'Save Model'))
+
+
+
 #Need Create StopModel form twith functionality with a shared base form. 
 
 class ModelDetails(forms.ModelForm):
@@ -50,7 +75,6 @@ class ModelDetails(forms.ModelForm):
         name = self.cleaned_data['model_name']
         
         return name
-    
     
 
     class Meta:

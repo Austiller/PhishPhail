@@ -7,7 +7,7 @@ from trainer.trainer import AttributeManager,Trainer
 from trainer.forms import ModelForm,  ModelDetails, ModelEdit
 from trainer.models import Model, FQDNInstance, KeyWord 
 from .forms import ModelForm
-
+from django import forms
 
 @background(name="Train_Model")
 def train_model(modelName,model_id):
@@ -18,6 +18,10 @@ def train_model(modelName,model_id):
     return 1
 
 
+
+def updateTrainingData(request):
+    context = {}
+    return render(request,'trainer/trainer_upload.html',context)
 
 # Model Form create 
 class ModelCreateView (CreateView):
@@ -52,6 +56,8 @@ class FQDNInstanceListView(ListView):
     
     def get_context_data (self,**kwargs):
         context = super(FQDNInstanceListView,self).get_context_data(**kwargs)
+
+        
         paginator = context['paginator']
         
 
@@ -69,7 +75,7 @@ class FQDNInstanceListView(ListView):
         return context
 
     def  get_queryset(self):
-        return FQDNInstance.objects.all().filter(score__gte=0.5)
+        return FQDNInstance.objects.all().filter(score__gte=0.75)
     
 
 def fqdninstance_details (request,pk):

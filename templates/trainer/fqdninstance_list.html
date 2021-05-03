@@ -33,16 +33,18 @@
               <th>Domain</th>
               <th>SubDomain</th>
               <th>Date Seen</th>
+            
             </tr>
           </thead>
           <tbody>
             {% for fqdn in fqdn_list %}
               <tr>
                 <td><a href="{% url 'view_fqdn_details' fqdn.pk %}">{{ fqdn.fqdn_full }}</a></td>
-                <td>{{ fqdn.score }}</td>
+                <td>{{ fqdn.score|floatformat:2 }}</td>
                 <td>{{ fqdn.fqdn_type }}</td>
                 <td>{{ fqdn.fqdn_domain }}</td>
                 <td>{{ fqdn.fqdn_subdomain }}</td>
+
                 <td> {{fqdn.date_seen}}</td>
               </tr>
             {% empty %}
