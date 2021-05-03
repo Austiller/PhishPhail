@@ -1,0 +1,28 @@
+
+
+
+{% extends "base.html" %}
+
+{% load crispy_forms_tags %}
+
+
+
+{% block content %}
+
+  <div class="d-flex flex-column align-items-md-center justify-content-center w-100 p-3">
+   <form method="post" >
+    {% csrf_token %}
+
+      
+      <form method="post">{% csrf_token %}
+        <p>Are you sure you want to delete "{{ object }}"?</p>
+        <input type="submit" value="Confirm">
+    </form>
+
+
+
+   
+{% endblock %}
+
+
+

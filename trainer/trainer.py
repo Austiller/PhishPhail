@@ -67,6 +67,7 @@ class Trainer:
         return self.modelDetails
 
     #Convert to class method
+
     def train_model (self):
         """
         Train the model with the attributes and labels generated from training set.
@@ -94,7 +95,7 @@ class Trainer:
         #train the model
         self.model = LogisticRegression(C=10).fit(self._x_train, self._y_train)
         
-      
+
 
         
     def measure_model (self):
@@ -172,20 +173,7 @@ class Trainer:
         
        
     
-    def get_fqdns (self):
-        """
-            Gets the FQDNs for training
-
-            args:
-
-                None
-
-            return:
-                fqdns (list): a list of Fqdn objects representing the fqdns to be used for training the predictor. 
-        
-        """
-
-        return  
+   
 
 
 class AttributeManager:
@@ -225,7 +213,7 @@ class AttributeManager:
             # Must sort dictionary by key before adding.
             analysis = OrderedDict(sorted(analysis.items()))
             attributes.append(analysis)    
-      
+
         result = {}
         result['values'] = []
         for attribute in attributes:
@@ -290,7 +278,7 @@ class AttributeManager:
         results = OrderedDict()
 
         regCheck = re.compile("[A-z]*[0-9]{1,}[A-z]+")
-
+        
         results['num_start'] = 1 if regCheck.search(fqdn.fqdn) != None else 0
 
      

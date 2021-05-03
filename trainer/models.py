@@ -54,9 +54,7 @@ class TopLevelDomain(models.Model):
     def __unicode__(self):
         return self.tld
 
-class Test (models.Model):
 
-    test = models.CharField(max_length=200)
 
 class SquatedWord (models.Model):
     """Words that are likely to be typosquated."""
@@ -176,7 +174,8 @@ class FQDNInstance(models.Model):
 
 class Model (models.Model):
     # Name of the Model
-    model_name = models.CharField(default=False,max_length=128,null=True)
+    model_name = models.CharField(default=False,max_length=128,null=False)
+    model_description = models.CharField(default="",max_length=256,null=True)
     model_algorithm =  models.CharField(default=False,max_length=128,null=True)
     model_creation_date = models.DateTimeField(null=True,auto_now_add=True)
     

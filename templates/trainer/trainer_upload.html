@@ -1,0 +1,42 @@
+
+{% extends "base.html" %}
+
+
+{% block content %}
+   <div class="d-flex justify-content-center align-items-center m-3">
+    <div class="d-flex flex-column justify-content-center">
+      <div class="d-flex flex-row mb-2">
+       
+      </div>
+      <div>
+        <table   class="table">
+          <thead class="thead-dark">
+            <tr>
+              <th>Attribute Set</th>    
+                <th>#</th>    
+            </tr>
+          </thead>
+          <tbody>
+            
+              <tr>
+                <td>FQDN</td>
+                <td><a href="{% url 'update_fqdn' %}" role="button">Upload</a></td>
+              </tr>
+                   <tr>
+                <td>Brands</td>
+                <td><a href="{% url 'update_brands' %}" role="button">Upload</a></td>
+              </tr>
+                   <tr>
+                <td>Keywords</td>
+                <td><a href="{% url 'update_keywords' %}" role="button">Upload</a></td>
+              </tr>
+                 <tr>
+                <td>SquatedWords</td>
+                <td><a href="{% url 'update_squatedwords' %}" role="button">Upload</a></td>
+              </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+</div>
+{% endblock %}

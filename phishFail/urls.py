@@ -22,8 +22,8 @@ from trainer.views import ModelCreateView, trainerSettings, homeView,  FQDNInsta
 
 urlpatterns = [
     url(r'^$', FQDNInstanceListView.as_view(), name='home'),
-    path('^admin/',  admin.site.urls),
+    path('admin/',  admin.site.urls),
     path('trainer/', include('trainer.urls')),
-    path('models/', include('modeler.urls'))
+    path('models/', include('modeler.urls'),name="models")
 
 ]

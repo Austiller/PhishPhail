@@ -21,7 +21,7 @@ class ModelForm(forms.ModelForm):
 
     class Meta:
         model = Model
-        fields = ('model_name', 'set_as_default')
+        fields = ('model_name', 'model_description','set_as_default')
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -31,6 +31,31 @@ class ModelForm(forms.ModelForm):
         #self.helper.fields['accuracy_training_set'].widget.attrs['readyonly'] = True
         self.helper.form_method = 'POST'
         self.helper.add_input(Submit('submit', 'Save Model'))
+
+
+
+class FQDNInstance(forms.ModelForm):
+    """Using the Django Form helper to build a form for the model"""
+
+    def clean_model_name(self):
+        """Santize the user input for the model name."""
+        name = self.cleaned_data['model_name']
+        #Add Description Field.
+        return name
+
+    class Meta:
+        model = Model
+        fields = ('model_name', 'model_description','set_as_default')
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.helper = FormHelper()
+    
+
+        #self.helper.fields['accuracy_training_set'].widget.attrs['readyonly'] = True
+        self.helper.form_method = 'POST'
+        self.helper.add_input(Submit('submit', 'Save Model'))
+
 
 
 #Need Create StopModel form twith functionality with a shared base form. 
@@ -51,12 +76,11 @@ class ModelDetails(forms.ModelForm):
         
         return name
     
-    
 
     class Meta:
         model = Model
  
-        fields = ('model_name','model_algorithm','set_as_default', 'accuracy_training_set', 'accuracy_precision','accuracy_recall')
+        fields = ('model_name','model_description','model_algorithm','set_as_default', 'accuracy_training_set', 'accuracy_precision','accuracy_recall')
 
 
 
@@ -64,8 +88,7 @@ class ModelDetails(forms.ModelForm):
         super().__init__(*args, **kwargs)
         self.helper = FormHelper()
         
-        #Set fields to be read_only so form appearance aligns with functionality of the form. 
-      #  for field in ModelDetails.read_only_fields:
+  
         for field in self.fields:
             self.fields[field].widget.attrs['readonly'] = True
             

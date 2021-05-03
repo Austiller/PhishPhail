@@ -16,4 +16,3 @@ class FoundFQDN (models.Model):
 class CertStreamTask(models.Model):
     task = models.CharField(max_length=30, blank=True, null=True)
     is_running =  models.BooleanField(blank=False,default=False )
-   # model_id = models.ForeignKey(Model,default=0,)

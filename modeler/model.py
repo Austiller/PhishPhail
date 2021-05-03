@@ -16,7 +16,6 @@ import pickle
 from datetime import time
 from trainer.models import FQDN, Brand, TopLevelDomain, KeyWord, SquatedWord, Model, FQDNInstance
 from phishFail.settings import FQDN_THRESHOLD
-from modeler.models import FoundFQDN
 from background_task import background
 
 
@@ -121,7 +120,7 @@ class Modeler:
         #Removes wildcard certs and www.* certs
         if message['message_type'] == "certificate_update":
             csFqdnList = message['data']['leaf_cert']['all_domains']
-        
+
             
             
 
@@ -132,7 +131,7 @@ class Modeler:
                 elif csFqdn.startswith("www.") and (csFqdn[4:] in csFqdnList):
                     csFqdnList.remove(csFqdn)
 
-          
+
                
             # 'Convert' found domains to a list Fqdn class. This will make updating the FQDNInstance table easier with the FQDN properties. 
             csFqdnList = [Fqdn(csFqdn,fqdn_type='unknown') for csFqdn in csFqdnList]
@@ -167,27 +166,29 @@ class Modeler:
                
 
              
-       
+                brand_list = list(csFqdn.brand_match.values())
                 kw_list = list(csFqdn.keyword_match.values())
 
                 #Get Brand Match
 
-                
-               
+                 
+
+                fi = FQDNInstance(fqdn_full=csFqdn.fqdn_full,fqdn_tested=csFqdn.fqdn,score=csFqdn.score,entropy=csFqdn.entropy,model_match='linearRegression',fqdn_subdomain=csFqdn.subdomain,fqdn_domain=csFqdn.domain,fqdn_type=csFqdn.fqdn_type)
                 
                 if csFqdn.score >= FQDN_THRESHOLD:
-                    fi = FQDNInstance(fqdn_full=csFqdn.fqdn_full,fqdn_tested=csFqdn.fqdn,score=csFqdn.score,entropy=csFqdn.entropy,model_match='linearRegression',fqdn_subdomain=csFqdn.subdomain,fqdn_domain=csFqdn.domain,fqdn_type=csFqdn.fqdn_type)
                     fi.save()
                     
                  #Get Keyword Match
-                for kw in kw_list:
-                   
-                    k = KeyWord.objects.get(pk=kw)
-                   
-                    fi.matched_keywords.add(k)
-               
-                
+                    for kw in kw_list:
+                        k = KeyWord.objects.get(pk=kw)
+                        fi.matched_keywords.add(k)
 
+                    
+
+                    for br in brand_list:
+                        b = Brand.objects.get(pk=br)
+                        fi.matched_brands.add(b)
+                    fi.save()
                 return
 
             
@@ -203,12 +204,12 @@ class Modeler:
             result (list): Results from the evaluation from the trainer ex. [1.000, 0.981, 0.001].
         """
         
-    
+
         features = self.attributes.compute_attributes(fqdns,speed=True)
 
         #function of algo
         scores = self.model.predict_proba(features['values'])[:,1]
-       
+
         result = []
         for score in scores:
             if score > 0.15:
