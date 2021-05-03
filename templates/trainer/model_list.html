@@ -24,7 +24,7 @@
           <tbody>
             {% for model in model_list %}
               <tr>
-                <td><a href="{% url 'view_model_details' model.pk %}">{{ model.model_name }}</a></td>
+                <td><a href="{% url 'modelEdit' model.pk %}">{{ model.model_name }}</a></td>
                 <td>{{ model.set_as_default }}</td>
               
                 <td>{{ model.accuracy_precision }}</td>

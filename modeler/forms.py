@@ -45,7 +45,7 @@ class ExecuteModel(forms.ModelForm):
         for field in ExecuteModel.read_only_fields:
             self.fields[field].widget.attrs['readonly'] = True
 
-        #input(Model.model_running)
+        
         
         self.helper.form_method = 'POST'
 

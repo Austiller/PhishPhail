@@ -96,7 +96,7 @@ Q_CLUSTER = {
 }
 
 WSGI_APPLICATION = 'phishFail.wsgi.application'
-
+FQDN_THRESHOLD = 0.45
 
 # Database
 # https://docs.djangoproject.com/en/2.1/ref/settings/#databases
@@ -105,8 +105,8 @@ DATABASES = {
 
         'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'phishphail',
-        'USER': 'postgres',
+        'NAME': 'phishPhail',
+        'USER': 'svc_phish_phail',
         'PASSWORD': 'Password12!',
         'HOST': '127.0.0.1',
         'PORT': '5432',}

@@ -6,7 +6,6 @@ from collections import Counter, OrderedDict
 from Levenshtein import distance
 import tldextract
 import numpy as np
-#from certStream.database import Database,Fqdn
 from psycopg2 import sql
 import numpy
 from collections import OrderedDict, defaultdict
@@ -16,7 +15,7 @@ import logging
 import pickle
 from datetime import time
 from trainer.models import FQDN, Brand, TopLevelDomain, KeyWord, SquatedWord, Model, FQDNInstance
-
+from phishFail.settings import FQDN_THRESHOLD
 from modeler.models import FoundFQDN
 from background_task import background
 
@@ -111,11 +110,10 @@ class Modeler:
 
     def __call__ (self):
         """Start the listener"""
-        #print("CertStream")
         certstream.listen_for_events(message_callback=self.certstream_handler, url='wss://certstream.calidog.io/')
 
 
-    def certstream_handler (self,message, context):
+    def certstream_handler (self,message, context) -> None:
         # May remove, set cerstream flag instead to ignore heartbeats
         if message['message_type'] == "heartbeat":
             return
@@ -156,7 +154,7 @@ class Modeler:
                 csFqdn.score = score
 
                 print("FQDN:{}\nScore:{}\nBrands:{}\nKeyWord:{}".format(csFqdn.fqdn,score,csFqdn.brand_match,csFqdn.keyword_match))
-          
+
                 if (csFqdn.score > 0.45 and csFqdn.score < 0.70 ):
                     csFqdn.fqdn_type = 'Likely Malicious'
                 elif (csFqdn.score > 0.70):
@@ -175,12 +173,13 @@ class Modeler:
                 #Get Brand Match
 
                 
-                #Get Keyword Match
-
-
-                fi = FQDNInstance(fqdn_full=csFqdn.fqdn_full,fqdn_tested=csFqdn.fqdn,score=csFqdn.score,entropy=csFqdn.entropy,model_match='linearRegression',fqdn_subdomain=csFqdn.subdomain,fqdn_domain=csFqdn.domain,fqdn_type=csFqdn.fqdn_type)
-                fi.save()
-             
+               
+                
+                if csFqdn.score >= FQDN_THRESHOLD:
+                    fi = FQDNInstance(fqdn_full=csFqdn.fqdn_full,fqdn_tested=csFqdn.fqdn,score=csFqdn.score,entropy=csFqdn.entropy,model_match='linearRegression',fqdn_subdomain=csFqdn.subdomain,fqdn_domain=csFqdn.domain,fqdn_type=csFqdn.fqdn_type)
+                    fi.save()
+                    
+                 #Get Keyword Match
                 for kw in kw_list:
                    
                     k = KeyWord.objects.get(pk=kw)
@@ -188,11 +187,7 @@ class Modeler:
                     fi.matched_keywords.add(k)
                
                 
-               
-                #fi = FQDNInstance(csFqdn.fqdn_full,csFqdn.fqdn,csFqdn.fqdn_type,csFqdn.score, csFqdn.entropy,'linearRegression')
-                #self.dbCursor.execute(insert_string,  (csFqdn.fqdn_full,csFqdn.fqdn,csFqdn.fqdn_type,csFqdn.score, csFqdn.entropy,'linearRegression'))
-               
-                #self.dbConnection.commit()
+
                 return
 
             

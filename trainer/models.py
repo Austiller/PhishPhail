@@ -19,7 +19,7 @@ class Tag (models.Model):
         return self.tag
 
 
-# Create your models here.
+
 class Brand(models.Model):
     """A Model used to define the brand names to be monitored for typo-squating"""
     brand_name = models.CharField(max_length=200)
@@ -160,10 +160,11 @@ class FQDNInstance(models.Model):
 
     # If the domain of the FQDN matches a tracked brand
     matched_brands = models.ManyToManyField(Brand)
-
+    
     matched_keywords =  models.ManyToManyField(KeyWord)
 
     # If the subdomain of the FQDN matches a tracked brand
+
     #brand_subdomain_match = models.ForeignKey(Brand)
 
     # The date which the FQDN was seen

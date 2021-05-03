@@ -1,0 +1,65 @@
+
+{% extends "base.html" %}
+
+
+
+{% block content %}
+  
+  <div class="d-flex justify-content-center align-items-center m-3">
+    <div class="d-flex flex-column justify-content-center align-items-center">
+
+      <div>
+        <table   class="table">
+          <thead class="thead-dark">
+            <tr>
+              <th>FQDN</th>
+              <th>Score</th>
+              <th>Type</th>
+              <th>Domain</th>
+              <th>SubDomain</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for fqdn in fqdn_list %}
+              <tr>
+                <td><a href="{% url 'view_fqdn_details' fqdn.pk %}">{{ fqdn.fqdn_full }}</a></td>
+                <td>{{ fqdn.score }}</td>
+                <td>{{ fqdn.fqdn_type }}</td>
+                <td>{{ fqdn.fqdn_domain }}</td>
+                <td>{{ fqdn.fqdn_subdomain }}</td>
+              </tr>
+            {% empty %}
+              <tr class="table-active">
+                <td colspan="3">No data</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+
+      </div>
+        <div class="pagination">
+        <span class="step-links">
+            {% if page_obj.has_previous %}
+                <a href="?page=1">&laquo; First </a>
+                <a href="?page={{ page_obj.previous_page_number }}"> Previous </a>
+            {% endif %}
+
+            <span class="current">
+                Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+            </span>
+
+            {% if page_obj.has_next %}
+                <a href="?page={{ page_obj.next_page_number }}"> Next </a>
+                <a href="?page={{ page_obj.paginator.num_pages }}"> Last &raquo;</a>
+            {% endif %}
+            </span>
+        </div>
+
+    </div>  
+    
+    
+</div>
+
+
+{% endblock %}
+

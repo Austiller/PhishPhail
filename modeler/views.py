@@ -1,11 +1,12 @@
-from django.shortcuts import render, HttpResponse, get_object_or_404
+from django.shortcuts import render, HttpResponse, get_object_or_404,reverse,HttpResponseRedirect
 from django.http import JsonResponse
 from django.urls import reverse_lazy
-from django.views.generic import ListView, CreateView, UpdateView
+from django.views.generic import ListView, CreateView, UpdateView, DetailView
 # Create your views here.
 from background_task import background
 from modeler.forms import  ExecuteModel
 from trainer.models import Model
+import trainer.views as tViews
 from modeler.model import Modeler
 import certstream
 import pickle 
@@ -14,8 +15,6 @@ from background_task.models import CompletedTask
 from os import system
 from .models import *
 import threading 
-
-
 
 @background
 def runModel (request, pk):
@@ -47,6 +46,9 @@ def clear_stuff():
     CompletedTask.objects.all().delete()
 
 
+
+
+
 def startModel (request, pk):
     context = {}
     #Trigger 
@@ -56,35 +58,39 @@ def startModel (request, pk):
     #Stop all other running models. Eventually set it so only urls above the threshold are the ones that are saved for all models running but the defualt. 
     # or have the models run against the database after populated by the default model. 
 
+  
     model = Model.objects.get(pk=pk)
-    start_certstream_task(model.id)
+    
+    model.model_running = True
+    model.save()
+    mpk = model.pk
+    
+    # run one model at a time, stop all other models
+    for m in Model.objects.exclude(id=mpk):
+        m.model_running = False
+        m.save()
+        
+
+    #start_certstream_task(model.id)
 
 
     #Check if Model is already running
-  #  currentTask = CertStreamTask.objects.get(model_id=pk,is_running=True)
+    #currentTask = CertStreamTask.objects.get(model_id=pk,is_running=True)
 
-
-
-
-    #If not, Stop other models running, then start model
-
-
-    #Else start model
-
-
-
-
-
-   # run_model('1', repeat=10)
-   # clear_stuff(repeat=30)
-   
-
-
-    return render(request,'trainer_settings.html',context=context)
+        
+    #ml = ModelListView()
+    
+    
+    return HttpResponseRedirect(reverse('models'))
 
  
 def stopModel (request, pk):
     context = {}
+    model = Model.objects.get(pk=pk)
 
+    model.model_running = False
+    model.save()
 
-    return render(request,'base.html',context=context)
+   
+
+    return HttpResponseRedirect(reverse('models'))
