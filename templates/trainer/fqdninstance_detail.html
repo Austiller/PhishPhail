@@ -9,12 +9,12 @@
 
 {% block content %}
 
-  <div class="d-flex flex-column align-items-md-center justify-content-center w-75 p-3">
+  <div class="d-flex flex-column align-items-center justify-content-center w-50 p-3">
    
    
 
 
-    <div  class="d-md-inline-flex justify-content-between">
+    <div  class=" align-items-center  w-100">
       <table   class="table">
           <thead class="thead-dark">
             <tr>
@@ -30,7 +30,6 @@
               <tr>
               <td>{{ fqdn.fqdn_full }}</a></td>
               <td>{{ fqdn.score }}</td>
-
               <td>{{ fqdn.fqdn_type }}</td>
               <td>{{ fqdn.fqdn_domain }}</td>
               <td>{{ fqdn.fqdn_subdomain }}</td>
@@ -39,11 +38,11 @@
           </tbody>
         </table>
         
-    </div>
-     <table   class="table">
+    
+       <table   class="table">
           <thead class="thead-dark">
             <tr>
-              <th>Keyword</th>
+              <th >Keyword</th>
             </tr>
           </thead>
           <tbody>
@@ -52,9 +51,35 @@
               <td>{{ kw}}</a></td>
          
               </tr>
+              {% empty %}
+              <tr class="table-active">
+                <td colspan="3">None Found</td>
+                
+              </tr>
               {% endfor %}
           </tbody>
         </table>
+
+          <table  class="table">
+          <thead class="thead-dark">
+            <tr>
+              <th>Brands</th>
+            </tr>
+          </thead>
+          <tbody >
+             {% for br in brands %}
+              <tr>
+              <td>{{ br}}</a></td>
+         
+              </tr>
+              {% empty %}
+              <tr class="table-active">
+                <td colspan="3">None Found</td>
+              </tr>
+              {% endfor %}
+          </tbody>
+        </table>
+        </div>
       <a class="btn btn-primary" href="{% url 'home' %}"role="button">Return</a>
 
   <div>

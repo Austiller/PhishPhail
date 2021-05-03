@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  {% block title %}<title>ctlPhish</title>{% endblock %}
+  {% block title %}<title>PhishPhail</title>{% endblock %}
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
@@ -34,8 +34,7 @@
             <div class="dropdown-menu" >
               <a class="dropdown-item" href="{% url 'models' %}">View Models</a>
               <a class="dropdown-item" href="{% url 'createModel' %}">Create Model</a>
-              <div class="dropdown-divider"></div>
-              <a class="dropdown-item" href="{% url 'trainerSettings' %}">Model Settings</a>
+              
             </div>
 
             <li class="nav-item ">

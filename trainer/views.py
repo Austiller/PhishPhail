@@ -33,7 +33,7 @@ class ModelCreateView (CreateView):
     model = Model
     form_class = ModelForm
     template_name = 'trainer/model_form.html'
-    
+        
     def form_valid(self, form):
         model = form.save(commit=False)
         model.save()
@@ -47,31 +47,42 @@ class ModelCreateView (CreateView):
 
 class FQDNInstanceListView(ListView):
     model = FQDNInstance
-    paginate_by = 100
-   # context_object_name = 'fqdn_list'
+    paginate_by = 20        
+    context_object_name = 'fqdn_list'
+    
     def get_context_data (self,**kwargs):
-        context  = {}
-        context['fqdn_list'] = FQDNInstance.objects.all().filter(score__gte=0.5)
+        context = super(FQDNInstanceListView,self).get_context_data(**kwargs)
+        paginator = context['paginator']
+        
+
+        page_numbers_range = 10  
+        start_idx = len(paginator.page_range)
+        page = self.request.GET.get('page')
+        current_page = int(page) if page else 1
+        start_index = int((current_page - 1) / page_numbers_range) * page_numbers_range
+        stop_idx = start_index + page_numbers_range
+        if stop_idx >= start_idx:
+            stop_idx = start_idx
+
+        page_range = paginator.page_range[start_index:stop_idx]
+        context['page_range'] = page_range
         return context
+
+    def  get_queryset(self):
+        return FQDNInstance.objects.all().filter(score__gte=0.5)
+    
 
 def fqdninstance_details (request,pk):
     context = {}
     context['fqdn'] = FQDNInstance.objects.get(pk=pk)
-    context['keywords'] = []
-    for kw in context['fqdn'].matched_keywords.all():
-        context['keywords'].append(kw.keyword)
-        print(context)
+    context['keywords'] = [kw.keyword for kw in context['fqdn'].matched_keywords.all()]
+    context['brands'] =  [br.brand_name for br in context['fqdn'].matched_brands.all()]
+    
     return render(request,'trainer/fqdninstance_detail.html',context)
 
 
 
 
-class ModelUpdateView(UpdateView):
-    model = Model
-    form_class = ModelForm
-    template_name = 'trainer/model_form.html'
-    success_url = reverse_lazy('models')
-    
 
 def homeView(request):
     context = {}
@@ -90,30 +101,4 @@ class ModelListView (ListView):
         context  = {}
         context['model_list'] = Model.objects.all()
         return context
-
-
-
-class ModelEdit (UpdateView):
-    """
-
-        This function checks to see if the model can be run. If not it returns a message stating as such and steps the user can take. 
-
-
-    """
-
-    model = Model
-    form_class = ModelEdit
-    template_name = 'trainer/model_details.html'
-
-    #If the form is valid, pass the primary key referencing the model to be executed. 
-    def form_valid(self, form):
-        model = form.save(commit=True)
-        request = self.request
-
-        return HttpResponseRedirect(reverse('models'))
-
-
-    def get_success_url(self):
-        return reverse_lazy('models')
-
 

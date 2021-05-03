@@ -6,8 +6,23 @@
 {% block content %}
   
   <div class="d-flex justify-content-center align-items-center m-3">
-    <div class="d-flex flex-column justify-content-center align-items-center">
+    <div class="d-flex flex-column justify-content-center ">
+      <div  class="d-flex align-self-left p-3">
+       <ul class="nav ">
+        <li class="nav-item dropdown ">
+            <a class="nav-link dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">CSV Reports</a>
+            <div class="dropdown-menu" >
+             <a class="dropdown-item" href="{% url 'download_all' %}">Download All</a>
+              <a class="dropdown-item" href="{% url 'download_malicious' %}">Malicious Only</a>
+              
+            </div>
 
+          </li>
+
+        </ul>
+
+      
+      </div>
       <div>
         <table   class="table">
           <thead class="thead-dark">
@@ -17,6 +32,7 @@
               <th>Type</th>
               <th>Domain</th>
               <th>SubDomain</th>
+              <th>Date Seen</th>
             </tr>
           </thead>
           <tbody>
@@ -27,33 +43,68 @@
                 <td>{{ fqdn.fqdn_type }}</td>
                 <td>{{ fqdn.fqdn_domain }}</td>
                 <td>{{ fqdn.fqdn_subdomain }}</td>
+                <td> {{fqdn.date_seen}}</td>
               </tr>
             {% empty %}
               <tr class="table-active">
-                <td colspan="3">No data</td>
+                <td colspan="3">None Found</td>
               </tr>
             {% endfor %}
           </tbody>
         </table>
 
-      </div>
-        <div class="pagination">
-        <span class="step-links">
-            {% if page_obj.has_previous %}
-                <a href="?page=1">&laquo; First </a>
-                <a href="?page={{ page_obj.previous_page_number }}"> Previous </a>
-            {% endif %}
+      
+        <div class="container">
+                  <!-- Pagination -->
+                  {% if is_paginated %}
+                  <nav>
+                      <ul class="pagination justify-content-center" style="margin:20px 0">
+                      {% if page_obj.has_previous %}
+                          <li class="page-item">
+                          <a class="page-link" href="?page={{ page_obj.previous_page_number }}">
+                              <span>Prev</span>
+                          </a>
+                          </li>
+                      {% else %}
+                          <li class="disabled page-item">
+                          <a class="page-link" href="#">
+                              <span>Prev</span>
+                          </a>
+                          </li>
+                      {% endif %}
 
-            <span class="current">
-                Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
-            </span>
+                      {% for page in page_range %}
+                          <li {% if page == page_obj.number %} class="active page-item" {% endif %}>
+                          <a class="page-link" href="?page={{ page }}">{{ page }}</a>
+                          </li>
+                      {% endfor %}
+                      {% if page_obj.has_next %}
+                          <li class="page-item">
+                          <a class="page-link" href="?page={{ page_obj.next_page_number }}">
+                              <span>Next</span>
+                          </a>
+                          </li>
+                      {% else %}
+                          <li {% if not page_obj.has_next %}class="disabled page-item"{% endif %}>
+                          <a class="page-link" href="#">
+                              <span>Next</span>
+                          </a>
+                          </li>
+                      {% endif %}
+                      </ul>
+                  </nav>
+                  {% endif %}
+          </div>
 
-            {% if page_obj.has_next %}
-                <a href="?page={{ page_obj.next_page_number }}"> Next </a>
-                <a href="?page={{ page_obj.paginator.num_pages }}"> Last &raquo;</a>
-            {% endif %}
-            </span>
-        </div>
+
+
+
+
+
+
+
+
+
 
     </div>  
     

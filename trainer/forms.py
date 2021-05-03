@@ -21,7 +21,7 @@ class ModelForm(forms.ModelForm):
 
     class Meta:
         model = Model
-        fields = ('model_name', 'set_as_default')
+        fields = ('model_name', 'model_description','set_as_default')
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -56,7 +56,7 @@ class ModelDetails(forms.ModelForm):
     class Meta:
         model = Model
  
-        fields = ('model_name','model_algorithm','set_as_default', 'accuracy_training_set', 'accuracy_precision','accuracy_recall')
+        fields = ('model_name','model_description','model_algorithm','set_as_default', 'accuracy_training_set', 'accuracy_precision','accuracy_recall')
 
 
 
@@ -64,8 +64,7 @@ class ModelDetails(forms.ModelForm):
         super().__init__(*args, **kwargs)
         self.helper = FormHelper()
         
-        #Set fields to be read_only so form appearance aligns with functionality of the form. 
-      #  for field in ModelDetails.read_only_fields:
+  
         for field in self.fields:
             self.fields[field].widget.attrs['readonly'] = True
             

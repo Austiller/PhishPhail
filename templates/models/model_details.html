@@ -9,7 +9,7 @@
 
 {% block content %}
 
-  <div class="d-flex flex-column align-items-md-center justify-content-center w-75 p-3">
+  <div class="d-flex flex-column align-items-md-center justify-content-center w-100 p-3">
    <form method="post" >
     {% csrf_token %}
 
@@ -28,9 +28,11 @@
       
 
       {% crispy form %}
-        <div  class="d-md-inline-flex justify-content-end">
-     
-          <a href="{% url 'models' %}">Cancel</a>
+        <div  class="d-flex justify-content-between">
+            
+          <a href="{% url 'delete_model' model.pk %}" role="button" class="p-3">Delete</a>
+          <a href="{% url 'models' %}" role="button" class="p-3">Cancel</a>
+        
         </div>
     </div>
 
