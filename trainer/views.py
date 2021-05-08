@@ -1,19 +1,19 @@
 from django.shortcuts import render, HttpResponse, get_object_or_404, HttpResponseRedirect
 from django.urls import reverse_lazy, reverse
 from django.views.generic import ListView, CreateView, UpdateView,DetailView
-from background_task import background
 from .models import FQDN,Model
 from trainer.trainer import AttributeManager,Trainer
 from trainer.forms import ModelForm,  ModelDetails, ModelEdit
 from trainer.models import Model, FQDNInstance, KeyWord 
 from .forms import ModelForm
 from django import forms
+import trainer.tasks as tasks
 
-@background(name="Train_Model")
-def train_model(modelName,model_id):
+
+def train_model(model_name,model_id):
     # Get all FQDNs for training
   
-    t = Trainer(name=modelName,model_id=model_id)
+    t = tasks.train_model.delay(model_name=model_name,model_id=model_id)
     
     return 1
 

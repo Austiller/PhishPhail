@@ -166,7 +166,7 @@ class Trainer:
             )
 
         try:
-            
+            # save the model
             m.save()
         except Exception as e:
             raise e
@@ -185,7 +185,6 @@ class AttributeManager:
     """
 
     def __init__(self):
-        
         self.trainer_brand = {b.id:b.brand_name for b in Brand.objects.all()}
         self.trainer_topleveldomain = [t.tld  for t in TopLevelDomain.objects.all()]
         self.trainer_keyword = {kw.id:kw.keyword for kw in KeyWord.objects.all()}
