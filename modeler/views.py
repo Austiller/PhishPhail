@@ -7,23 +7,20 @@ from background_task import background
 from modeler.forms import  ExecuteModel
 from trainer.models import Model
 import trainer.views as tViews
-from modeler.model import Modeler
-import certstream
-import pickle 
 from modeler.forms import ModelEdit
 from modeler.models import FoundFQDN
 from background_task.models import CompletedTask
 from os import system
-from .models import *
-import threading 
+from .models import * 
 from trainer.models import FQDNInstance
 import csv
+from modeler.tasks import start_model
 
 @background
 def runModel (request, pk):
     return render()
 
-def csvAll (request):
+def csv_all (request):
 
     
 
@@ -47,7 +44,7 @@ def csvAll (request):
     return response
 
 
-def csvMalicious (request):
+def csv_malicious (request):
 
     
 
@@ -101,18 +98,10 @@ class ModelEdit (UpdateView):
 def viewModel (request, pk):
     return render()
 
-@background(name="certstream")
+#@background(name="certstream")
 def start_certstream_task(model_id):
-    modelToRun = Model.objects.get(pk=model_id)
-    all_processes = []
-    att = pickle.loads(data=modelToRun.model_attributes, encoding='bytes')
-    mod = pickle.loads(data=modelToRun.model_binary, encoding='bytes')
-    m = Modeler(att,mod)
-
-    t = threading.Thread(target=m.__call__ ,name=str(model_id),daemon=True)
-
-    t.start()
-    return# JsonResponse({'id':process.name})
+    start_model(model_id=model_id)
+    return 
 
 
 
