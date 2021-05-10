@@ -9,7 +9,7 @@ from Levenshtein import distance
 import tldextract
 import numpy as np
 
-
+from trainer.models import Model as trainerModel
 from psycopg2 import sql
 import numpy
 from collections import OrderedDict, defaultdict
@@ -26,9 +26,9 @@ from datetime import datetime
 from collections import OrderedDict, Counter
 import pickle
 
-from trainer.models import FQDN, Brand, TopLevelDomain, SquatedWord, KeyWord
-
+#from trainer.models import  Brand, TopLevelDomain, SquatedWord, KeyWord
 from modeler.model import Fqdn
+from fqdn.models import *
 
 class Trainer:
     """
@@ -148,7 +148,7 @@ class Trainer:
 
     def package_model (self):
    
-        from trainer.models import Model as trainerModel
+        
 
         m = trainerModel(
             id = self.model_id,

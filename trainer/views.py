@@ -1,7 +1,7 @@
 from django.shortcuts import render, HttpResponse, get_object_or_404, HttpResponseRedirect
 from django.urls import reverse_lazy, reverse
 from django.views.generic import ListView, CreateView, UpdateView,DetailView
-from .models import FQDN,Model
+from .models import Model
 from trainer.trainer import AttributeManager,Trainer
 from trainer.forms import ModelForm,  ModelDetails, ModelEdit
 from trainer.models import Model, FQDNInstance, KeyWord 
@@ -55,8 +55,9 @@ class FQDNInstanceListView(ListView):
     context_object_name = 'fqdn_list'
     
     def get_context_data (self,**kwargs):
+        
         context = super(FQDNInstanceListView,self).get_context_data(**kwargs)
-
+       
         
         paginator = context['paginator']
         

@@ -7,7 +7,7 @@ from celery import Celery
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'phishFail.settings')
 
 # Must be created before app instances are started, hence the call by __init__
-app = Celery('phishFail',broker='pyamqp://localhost//', backend='rpc://',include=['phishFail.tasks','trainer.tasks','modeler.tasks'])
+app = Celery('phishFail')
 
 # Allows for configuration of celery via django settings file
 app.config_from_object('django.conf:settings', namespace='CELERY')

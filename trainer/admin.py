@@ -1,9 +1,9 @@
 from django.contrib import admin
-from trainer.models import FQDN,DomainPrefix,SquatedWord,Brand, Tag, TopLevelDomain,KeyWord, Model
+from trainer.models import DomainPrefix,SquatedWord,Brand, Tag, TopLevelDomain,KeyWord, Model
 
 
 # Register your models here.
-admin.site.register(FQDN)
+
 admin.site.register(DomainPrefix)
 admin.site.register(Brand)
 admin.site.register(SquatedWord)

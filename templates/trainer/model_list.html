@@ -30,7 +30,7 @@
                 <td>{{ model.accuracy_precision }}</td>
                   {% if model.model_running %}
                     <td><h4><span class="badge badge-success">RUNNING</span></h4></td>
-                    <td><a href="{% url 'stopModel' model.pk %}">STOP</a></td>
+                    <td><a href="{% url 'stop_certstream_task' model.pk %}">STOP</a></td>
 
                   {% else %}
                     <td><h4><span class="badge badge-dark">STOPPED</span></h4></td>
