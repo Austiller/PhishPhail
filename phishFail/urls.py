@@ -17,7 +17,8 @@ from django.contrib import admin
 from django.urls import path, include
 from django.conf.urls import url
 
-from trainer.views import ModelCreateView, trainerSettings, homeView,  FQDNInstanceListView
+from trainer.views import ModelCreateView, trainerSettings, homeView
+from fqdn.views import FQDNInstanceListView
 
 
 urlpatterns = [

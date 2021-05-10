@@ -36,7 +36,7 @@ class KeyWord(models.Model):
     keyword = models.CharField(max_length=200)
     keyword_tag = models.ManyToManyField(Tag)
   
-
+    
     def __str__(self):
         return self.keyword
 

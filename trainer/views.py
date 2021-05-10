@@ -3,7 +3,7 @@ from django.urls import reverse_lazy, reverse
 from django.views.generic import ListView, CreateView, UpdateView,DetailView
 from .models import Model
 from trainer.trainer import AttributeManager,Trainer
-from trainer.forms import ModelForm, FQDNInstanceForm
+from trainer.forms import ModelForm, FQDNInstanceForm,KeyWordForm
 from trainer.models import Model, FQDNInstance, KeyWord 
 from django import forms
 import trainer.tasks as tasks
@@ -15,6 +15,24 @@ import trainer.tasks as tasks
 def updateTrainingData(request):
     context = {}
     return render(request,'trainer/trainer_upload.html',context)
+
+class KeyWordCreateView (CreateView):
+    model = KeyWord
+    form_class = KeyWordForm
+
+    def form_valid(self,form):
+
+        model = form.save(commit=False)
+        model.save()
+
+        # Call keyword update code 
+        # tasks.train_model.delay(model_name=model_name,model_id=model_id,model_description=model_description)
+        
+        return HttpResponseRedirect(self.get_success_url())
+          
+    def get_success_url(self):
+        return reverse_lazy('models')  
+
 
 # Model Form create 
 class ModelCreateView (CreateView):

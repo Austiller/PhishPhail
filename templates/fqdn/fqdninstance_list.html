@@ -39,7 +39,7 @@
           <tbody>
             {% for fqdn in fqdn_list %}
               <tr>
-                <td><a href="{% url 'view_trainer_fqdn_details' fqdn.pk %}">{{ fqdn.fqdn_full }}</a></td>
+                <td><a href="{% url 'view_fqdn_details' fqdn.pk %}">{{ fqdn.fqdn_full }}</a></td>
                 <td>{{ fqdn.score|floatformat:2 }}</td>
                 <td>{{ fqdn.fqdn_type }}</td>
                 <td>{{ fqdn.fqdn_domain }}</td>

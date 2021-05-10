@@ -4,56 +4,6 @@ from django.db import models
 
 
 
-class FQDN(models.Model):
-    """Listing of FQDN found and categorized"""
-
-    fqdnType_choices = (
-        ('m','Malicious'),
-        ('b', 'Benign'),
-        ('u', 'Unknown')
-    )
-
-
-    fqdn = models.CharField(max_length=1000)
-    
-    fqdn_type = models.CharField(choices=fqdnType_choices,default='u',max_length=25)
-
-    for_training = models.BooleanField("Use For Training",default=False)
-
-    def number_dashes(self):
-        return 0 if "xn--" in self.fqdn else self.count("-")
-
-    def count_periods(self):
-        return self.fqdn.count(".")
-
-    def clean_fqdn(self,prefixes):
-        """Split the FQDN up and removing common web-prefixes, ensures the FQDN used is the root-FQDN only."""
-
-        split_fqdn = self.fqdn(".")
-
-        if len(split_fqdn) > 1:
-            if (split_fqdn[0] in prefixes):
-                return split_fqdn[0]
-            else:
-                return self.fqdn
-
-    def fqdn_parts(self):
-        """Return a dictionary of the FQDN containing Subdomain, domain and TLD"""
-
-        fqdn = tldextract.extract(self.fqdn)
-        return {"domain":fqdn.domain,"subdomain":fqdn.subdomain,"suffix":fqdn.suffix}
-
-    def fqdn_words(self):
-        """ #Split the domain by non-alphanumeric characters."""
-        return re.split("\W+", self.fqdn)
-    
-    def __unicode__(self):
-        return self.fqdn
-
-    def __str__(self):
-        return self.fqdn
-
-
 
 class Tag (models.Model):
 
@@ -149,13 +99,14 @@ class FQDNInstance(models.Model):
     fqdn_subdomain = models.CharField(null=True,max_length=200)
     fqdn_domain = models.CharField(null=True,max_length = 200)
 
-    # If the subdomain of the FQDN matches a tracked brand
-
     #brand_subdomain_match = models.ForeignKey(Brand)
 
     # The date which the FQDN was seen
     date_seen = models.DateTimeField(auto_now_add=True)
     
+    # If the domain of the FQDN matches a tracked brand
+    matched_brands = models.ManyToManyField(Brand)
     
+    matched_keywords =  models.ManyToManyField(KeyWord)
     # The Calculated randomness of the FQDN
     entropy = models.FloatField(default=0.0,null=True)
