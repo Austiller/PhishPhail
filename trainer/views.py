@@ -3,19 +3,12 @@ from django.urls import reverse_lazy, reverse
 from django.views.generic import ListView, CreateView, UpdateView,DetailView
 from .models import Model
 from trainer.trainer import AttributeManager,Trainer
-from trainer.forms import ModelForm,  ModelDetails, ModelEdit
+from trainer.forms import ModelForm, FQDNInstanceForm
 from trainer.models import Model, FQDNInstance, KeyWord 
-from .forms import ModelForm
 from django import forms
 import trainer.tasks as tasks
 
 
-def train_model(model_name,model_id):
-    # Get all FQDNs for training
-  
-    t = tasks.train_model.delay(model_name=model_name,model_id=model_id)
-    
-    return 1
 
 
 
@@ -33,7 +26,6 @@ class ModelCreateView (CreateView):
     
     """
 
-
     model = Model
     form_class = ModelForm
     template_name = 'trainer/model_form.html'
@@ -43,7 +35,7 @@ class ModelCreateView (CreateView):
         model.save()
 
         # Need to develop a thing that if the model fails to be created it removes the entry
-        train_model(model.model_name,model.id)
+        tasks.train_model.delay(model_name=model_name,model_id=model_id,model_description=model_description)
         return HttpResponseRedirect(self.get_success_url())
      
     def get_success_url(self):
@@ -77,19 +69,32 @@ class FQDNInstanceListView(ListView):
 
     def  get_queryset(self):
         return FQDNInstance.objects.all().filter(score__gte=0.75)
+
+class FQDNInstanceDetails (UpdateView):
+    model =  FQDNInstance
+    form_class = FQDNInstanceForm
+    context_object_name = 'fqdn'
+    template_name = 'trainer/fqdninstance_detail.html'
     
+   # form_class  = FQDNInstanceForm
+    def get_context_data (self,**kwargs):
+        
+        context = super(FQDNInstanceDetails,self).get_context_data(**kwargs)
+        context['keywords'] = ["Keyword 1","Keyword 2","Keyword 3"]#[kw.keyword for kw in context['fqdn'].matched_keywords.all()]
+        context['brands'] =  [br.brand_name for br in context['fqdn'].matched_brands.all()]
 
-def fqdninstance_details (request,pk):
-    context = {}
-    context['fqdn'] = FQDNInstance.objects.get(pk=pk)
-    context['keywords'] = [kw.keyword for kw in context['fqdn'].matched_keywords.all()]
-    context['brands'] =  [br.brand_name for br in context['fqdn'].matched_brands.all()]
-    
-    return render(request,'trainer/fqdninstance_detail.html',context)
+        return context
 
+    def form_valid(self, form):
+        model = form.save(commit=True)
+        model.save()
 
-
-
+        # Need to develop a thing that if the model fails to be created it removes the entry
+        
+        return  HttpResponseRedirect(self.get_success_url())
+   
+    def get_success_url(self):
+        return reverse_lazy('home')  
 
 def homeView(request):
     context = {}

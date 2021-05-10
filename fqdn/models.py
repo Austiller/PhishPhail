@@ -154,8 +154,8 @@ class FQDNInstance(models.Model):
     #brand_subdomain_match = models.ForeignKey(Brand)
 
     # The date which the FQDN was seen
-    date_seen = models.DateTimeField(auto_now=True)
+    date_seen = models.DateTimeField(auto_now_add=True)
     
-
+    
     # The Calculated randomness of the FQDN
     entropy = models.FloatField(default=0.0,null=True)

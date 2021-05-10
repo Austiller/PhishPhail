@@ -26,7 +26,7 @@ class ModelEdit(forms.ModelForm):
         return name
     
     
-
+    
     class Meta:
         model = Model
  

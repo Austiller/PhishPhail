@@ -1,18 +1,11 @@
 from os import walk, path
-import math
-import re
+import math, re,tldextract,logging,pickle
 from collections import Counter, OrderedDict
 #from stringdist import levenshtein
 from Levenshtein import distance
-import tldextract
 import numpy as np
 from psycopg2 import sql
-import numpy
 from collections import OrderedDict, defaultdict
-import certstream
-from certstream.core import CertStreamClient
-import logging
-import pickle
 from datetime import time
 from trainer.models import  Brand, TopLevelDomain, KeyWord, SquatedWord, Model, FQDNInstance
 from phishFail.settings import FQDN_THRESHOLD
@@ -146,7 +139,6 @@ class Modeler:
 
                 csFqdn.score = score
 
-                #print("FQDN:{}\nScore:{}\nBrands:{}\nKeyWord:{}".format(csFqdn.fqdn,score,csFqdn.brand_match,csFqdn.keyword_match))
 
                 if (csFqdn.score > 0.45 and csFqdn.score < 0.70 ):
                     csFqdn.fqdn_type = 'Likely Malicious'

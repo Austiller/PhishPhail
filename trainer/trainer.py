@@ -40,18 +40,19 @@ class Trainer:
         trainingAttributes (dict): 
 
     """
-    def __init__(self,model_id,name):
+    def __init__(self,model_id,name,description):
         """
         Initializes the Trainer class, training the model, measuring the model and packaging the model. 
         
         """
         self.model_id = model_id
         self.name = name
+        self.description = description
         self.attributeManager = AttributeManager()
         self.fqdnList = [Fqdn(f.fqdn,f.fqdn_type) for f in FQDN.objects.all()]
         self.trainingAttributes = self.attributeManager.compute_attributes(self.fqdnList)
         self.modelDetails = {}
-     
+        
 
         self.train_model()
         self.measure_model()

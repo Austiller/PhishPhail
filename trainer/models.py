@@ -114,7 +114,7 @@ class FQDNInstance(models.Model):
     #brand_subdomain_match = models.ForeignKey(Brand)
 
     # The date which the FQDN was seen
-    date_seen = models.DateTimeField(null=True)
+    date_seen = models.DateTimeField(auto_now_add=True)
 
 
     # The Calculated randomness of the FQDN
@@ -123,9 +123,9 @@ class FQDNInstance(models.Model):
 class Model (models.Model):
     # Name of the Model
     model_name = models.CharField(default=False,max_length=128,null=False)
-    model_description = models.CharField(default="",max_length=256,null=True)
+    model_description = models.TextField(default="",max_length=256,null=True)
     model_algorithm =  models.CharField(default=False,max_length=128,null=True)
-    model_creation_date = models.DateTimeField(null=True,auto_now_add=True)
+    model_creation_date = models.DateTimeField(null=True)
     
     # The number of malicious URLS used to train the model
     model_malicious_count = models.IntegerField(null=True,default=0)
