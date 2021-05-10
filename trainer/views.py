@@ -1,15 +1,43 @@
 from django.shortcuts import render, HttpResponse, get_object_or_404, HttpResponseRedirect
 from django.urls import reverse_lazy, reverse
 from django.views.generic import ListView, CreateView, UpdateView,DetailView
-from .models import Model
 from trainer.trainer import AttributeManager,Trainer
-from trainer.forms import ModelForm, FQDNInstanceForm,KeyWordForm
+from trainer.forms import ModelForm, FQDNInstanceForm
 from trainer.models import Model, FQDNInstance, KeyWord 
 from django import forms
 import trainer.tasks as tasks
+from fqdn.forms import KeyWordForm
+
+from django.template.defaultfilters import slugify
 
 
+def tagged(request, slug):
+    tag = get_object_or_404(Tag, slug=slug)
+    # Filter posts by tag name  
+    keywords = KeyWord.objects.filter(tags=tag)
+    context = {
+        'tag':tag,
+        'posts':keywords,
+    }
+    return render(request, 'home.html', context)
 
+def keyword_details (request):
+    keywords = KeyWord.objects.order_by('keyword')
+
+    common_categories = KeyWord.keyword_tags.most_common()[:3]
+    form = KeyWordForm(request.POST)
+
+    if form.is_valid():
+        new_keyword = form.save(commit=False)
+        new_keyword.slug = slugify(new_keyword.keyword)
+        form.save()
+        form.save_m2m()
+    context = {
+        'keywords':keywords,
+        'common_categories':common_categories,
+        'form':form
+    }
+    return render(request,'fqdn/keyword_form.html')
 
 
 def updateTrainingData(request):

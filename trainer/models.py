@@ -2,28 +2,16 @@ from django.db import models
 import re
 import tldextract
 from collections import Counter
-
+from taggit.managers import TaggableManager
 # Need to create view for training set 
 
-
-
-class Tag (models.Model):
-
-    tag_name = models.CharField(max_length=200)
- 
-
-    def __unicode__(self):
-        return self.tag
-
-    def __str__(self):
-        return self.tag
 
 
 
 class Brand(models.Model):
     """A Model used to define the brand names to be monitored for typo-squating"""
     brand_name = models.CharField(max_length=200)
-    brand_category = models.ManyToManyField(Tag)
+    
 
     
     def __str__(self):
@@ -34,9 +22,10 @@ class Brand(models.Model):
 
 class KeyWord(models.Model):
     keyword = models.CharField(max_length=200)
-    keyword_tag = models.ManyToManyField(Tag)
-  
-    
+   
+    slug = models.SlugField(unique=True,max_length=64,null=True)
+    keyword_tags = TaggableManager(related_name="trainer_kw_tags")
+
     def __str__(self):
         return self.keyword
 
@@ -45,7 +34,7 @@ class KeyWord(models.Model):
 
 class TopLevelDomain(models.Model):
     tld = models.CharField(max_length=10)
-    tld_tags = models.ManyToManyField(Tag)
+   
  
 
     def __str__(self):
@@ -59,7 +48,7 @@ class TopLevelDomain(models.Model):
 class SquatedWord (models.Model):
     """Words that are likely to be typosquated."""
     squated_word = models.CharField(max_length=200)
-    squated_tag = models.ManyToManyField(Tag)
+    
 
 
     def __str__(self):

@@ -3,11 +3,7 @@ from trainer.models import Model
 # Create your models here.
 
 
-class FoundFQDN (models.Model):
 
-    fqdn = models.CharField(max_length=512,null=True)
-    def __str__ (self):
-        return self.fqdn
 
 
 

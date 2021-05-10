@@ -23,9 +23,7 @@ class KeyWordForm (forms.ModelForm):
     
     class Meta:
         model = KeyWord
-        fields = ('keyword',)
-
-
+        fields = ('keyword','keyword_tags',)
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

@@ -8,7 +8,6 @@ from modeler.forms import  ExecuteModel
 from trainer.models import Model
 import trainer.views as tViews
 from modeler.forms import ModelEdit
-from modeler.models import FoundFQDN
 from background_task.models import CompletedTask
 from os import system
 from .models import * 

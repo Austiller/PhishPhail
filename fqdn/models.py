@@ -1,27 +1,17 @@
 from django.db import models
 # Create your models here.
+from taggit.managers import TaggableManager
 
 
 
-
-
-class Tag (models.Model):
-
-    tag_name = models.CharField(max_length=200)
- 
-
-    def __unicode__(self):
-        return self.tag
-
-    def __str__(self):
-        return self.tag
 
 
 
 class Brand(models.Model):
     """A Model used to define the brand names to be monitored for typo-squating"""
     brand_name = models.CharField(max_length=200)
-    brand_category = models.ManyToManyField(Tag)
+    slug = models.SlugField(unique=True,max_length=64,null=True)
+    brand_tags = TaggableManager()
 
     
     def __str__(self):
@@ -32,8 +22,9 @@ class Brand(models.Model):
 
 class KeyWord(models.Model):
     keyword = models.CharField(max_length=200)
-    keyword_tag = models.ManyToManyField(Tag)
-  
+   # keyword_tag = models.ManyToManyField(Tag)
+    slug = models.SlugField(unique=True,max_length=64,null=True)
+    keyword_tags = TaggableManager(related_name="fqdn_kw_tags")
 
     def __str__(self):
         return self.keyword
@@ -43,8 +34,9 @@ class KeyWord(models.Model):
 
 class TopLevelDomain(models.Model):
     tld = models.CharField(max_length=10)
-    tld_tags = models.ManyToManyField(Tag)
- 
+    slug = models.SlugField(unique=True,max_length=64,null=True)
+    tld_tags = TaggableManager()
+    
 
     def __str__(self):
         return self.tld
@@ -57,7 +49,8 @@ class TopLevelDomain(models.Model):
 class SquatedWord (models.Model):
     """Words that are likely to be typosquated."""
     squated_word = models.CharField(max_length=200)
-    squated_tag = models.ManyToManyField(Tag)
+    slug = models.SlugField(unique=True,max_length=64,null=True)
+    squated_word_tags = TaggableManager()
 
 
     def __str__(self):
@@ -70,7 +63,8 @@ class DomainPrefix(models.Model):
     """List of common hosts used by trainer."""
 
     domain_prefix = models.CharField(max_length=50)
- 
+    slug = models.SlugField(unique=True,max_length=64,null=True)
+   
 
     def get_prefixes(self):
         return self.domain_prefix
