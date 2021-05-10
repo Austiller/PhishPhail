@@ -15,6 +15,7 @@
           <thead class="thead-dark">
             <tr>
               <th>Name</th>
+              <th>Description</th>
               <th>Default</th>
               <th>Accuracy</th>
               <th>Status</th>
@@ -25,12 +26,13 @@
             {% for model in model_list %}
               <tr>
                 <td><a href="{% url 'modelEdit' model.pk %}">{{ model.model_name }}</a></td>
+                <td>{{ model.model_description }}</td>
                 <td>{{ model.set_as_default }}</td>
               
                 <td>{{ model.accuracy_precision }}</td>
                   {% if model.model_running %}
                     <td><h4><span class="badge badge-success">RUNNING</span></h4></td>
-                    <td><a href="{% url 'stopModel' model.pk %}">STOP</a></td>
+                    <td><a href="{% url 'stop_certstream_task' model.pk %}">STOP</a></td>
 
                   {% else %}
                     <td><h4><span class="badge badge-dark">STOPPED</span></h4></td>

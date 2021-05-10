@@ -7,23 +7,17 @@ from background_task import background
 from modeler.forms import  ExecuteModel
 from trainer.models import Model
 import trainer.views as tViews
-from modeler.model import Modeler
-import certstream
-import pickle 
 from modeler.forms import ModelEdit
 from modeler.models import FoundFQDN
 from background_task.models import CompletedTask
 from os import system
-from .models import *
-import threading 
+from .models import * 
 from trainer.models import FQDNInstance
 import csv
+from modeler.tasks import start_model
+import pickle
 
-@background
-def runModel (request, pk):
-    return render()
-
-def csvAll (request):
+def csv_all (request):
 
     
 
@@ -47,7 +41,7 @@ def csvAll (request):
     return response
 
 
-def csvMalicious (request):
+def csv_malicious (request):
 
     
 
@@ -101,32 +95,11 @@ class ModelEdit (UpdateView):
 def viewModel (request, pk):
     return render()
 
-@background(name="certstream")
-def start_certstream_task(model_id):
-    modelToRun = Model.objects.get(pk=model_id)
-    all_processes = []
-    att = pickle.loads(data=modelToRun.model_attributes, encoding='bytes')
-    mod = pickle.loads(data=modelToRun.model_binary, encoding='bytes')
-    m = Modeler(att,mod)
-
-    t = threading.Thread(target=m.__call__ ,name=str(model_id),daemon=True)
-
-    t.start()
-    return# JsonResponse({'id':process.name})
-
-
-
-@background
-def clear_stuff():
-    FoundFQDN.objects.all().delete()
-    print("Deleted All FQDNs")
-    CompletedTask.objects.all().delete()
 
 
 
 
-
-def startModel (request, pk):
+def start_certstream (request, pk):
     context = {}
     #Trigger 
 
@@ -140,15 +113,23 @@ def startModel (request, pk):
     
     model.model_running = True
     model.save()
-    mpk = model.pk
+   
     
     # run one model at a time, stop all other models
-    for m in Model.objects.exclude(id=mpk):
+    for m in Model.objects.exclude(id=model.pk):
         m.model_running = False
         m.save()
-        
 
-    start_certstream_task(model.id)
+
+    task = start_model.delay(model_id=pk)
+    modeler_task,created = ModelerTask.objects.get_or_create(model_id=pk)
+
+    
+    
+    modeler_task.task_name = "CertStream"
+    modeler_task.task=pickle.dumps(task)
+    modeler_task.status="RUNNING"
+    modeler_task.save()
     
 
     #Check if Model is already running
@@ -161,13 +142,18 @@ def startModel (request, pk):
     return HttpResponseRedirect(reverse('models'))
 
  
-def stopModel (request, pk):
+def stop_certstream (request, pk):
     context = {}
     model = Model.objects.get(pk=pk)
 
     model.model_running = False
     model.save()
 
+    model_task = ModelerTask.objects.get(model_id=pk)
+    mt = pickle.loads(model_task.task)
+    mt.revoke(terminate=True)
+    model_task.task = b''
+    model_task.status = "STOPPED"
+    model_task.save()
     
-
     return HttpResponseRedirect(reverse('models'))

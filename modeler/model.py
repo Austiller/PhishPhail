@@ -1,23 +1,16 @@
 from os import walk, path
-import math
-import re
+import math, re,tldextract,logging,pickle
 from collections import Counter, OrderedDict
 #from stringdist import levenshtein
 from Levenshtein import distance
-import tldextract
 import numpy as np
 from psycopg2 import sql
-import numpy
 from collections import OrderedDict, defaultdict
-import certstream
-from certstream.core import CertStreamClient
-import logging
-import pickle
 from datetime import time
-from trainer.models import FQDN, Brand, TopLevelDomain, KeyWord, SquatedWord, Model, FQDNInstance
+from trainer.models import  Brand, TopLevelDomain, KeyWord, SquatedWord, Model, FQDNInstance
 from phishFail.settings import FQDN_THRESHOLD
 from background_task import background
-
+from trainer.models import Model as SavedModel
 
 
 class Fqdn:
@@ -103,17 +96,13 @@ class Modeler:
         
 
 
-  
     def start(cls,model_id):
         return cls()
-
-    def __call__ (self):
-        """Start the listener"""
-        certstream.listen_for_events(message_callback=self.certstream_handler, url='wss://certstream.calidog.io/')
 
 
     def certstream_handler (self,message, context) -> None:
         # May remove, set cerstream flag instead to ignore heartbeats
+        
         if message['message_type'] == "heartbeat":
             return
         
@@ -121,8 +110,6 @@ class Modeler:
         if message['message_type'] == "certificate_update":
             csFqdnList = message['data']['leaf_cert']['all_domains']
 
-            
-            
 
             for csFqdn in csFqdnList:
                 if csFqdn.startswith('*.') and (csFqdn[2:] in csFqdnList):
@@ -152,7 +139,6 @@ class Modeler:
 
                 csFqdn.score = score
 
-                print("FQDN:{}\nScore:{}\nBrands:{}\nKeyWord:{}".format(csFqdn.fqdn,score,csFqdn.brand_match,csFqdn.keyword_match))
 
                 if (csFqdn.score > 0.45 and csFqdn.score < 0.70 ):
                     csFqdn.fqdn_type = 'Likely Malicious'
@@ -163,33 +149,14 @@ class Modeler:
                 else:
                     csFqdn.fqdn_type = 'Benign'
 
-               
-
-             
-                brand_list = list(csFqdn.brand_match.values())
-                kw_list = list(csFqdn.keyword_match.values())
-
-                #Get Brand Match
-
-                 
 
                 fi = FQDNInstance(fqdn_full=csFqdn.fqdn_full,fqdn_tested=csFqdn.fqdn,score=csFqdn.score,entropy=csFqdn.entropy,model_match='linearRegression',fqdn_subdomain=csFqdn.subdomain,fqdn_domain=csFqdn.domain,fqdn_type=csFqdn.fqdn_type)
                 
                 if csFqdn.score >= FQDN_THRESHOLD:
                     fi.save()
-                    
-                 #Get Keyword Match
-                    for kw in kw_list:
-                        k = KeyWord.objects.get(pk=kw)
-                        fi.matched_keywords.add(k)
 
-                    
 
-                    for br in brand_list:
-                        b = Brand.objects.get(pk=br)
-                        fi.matched_brands.add(b)
-                    fi.save()
-                return
+                return fi
 
             
     def execute_model (self,fqdns):

@@ -9,7 +9,7 @@ from Levenshtein import distance
 import tldextract
 import numpy as np
 
-
+from trainer.models import Model as trainerModel
 from psycopg2 import sql
 import numpy
 from collections import OrderedDict, defaultdict
@@ -26,9 +26,9 @@ from datetime import datetime
 from collections import OrderedDict, Counter
 import pickle
 
-from trainer.models import FQDN, Brand, TopLevelDomain, SquatedWord, KeyWord
-
+#from trainer.models import  Brand, TopLevelDomain, SquatedWord, KeyWord
 from modeler.model import Fqdn
+from fqdn.models import *
 
 class Trainer:
     """
@@ -40,18 +40,19 @@ class Trainer:
         trainingAttributes (dict): 
 
     """
-    def __init__(self,model_id,name):
+    def __init__(self,model_id,name,description):
         """
         Initializes the Trainer class, training the model, measuring the model and packaging the model. 
         
         """
         self.model_id = model_id
         self.name = name
+        self.description = description
         self.attributeManager = AttributeManager()
         self.fqdnList = [Fqdn(f.fqdn,f.fqdn_type) for f in FQDN.objects.all()]
         self.trainingAttributes = self.attributeManager.compute_attributes(self.fqdnList)
         self.modelDetails = {}
-     
+        
 
         self.train_model()
         self.measure_model()
@@ -148,7 +149,7 @@ class Trainer:
 
     def package_model (self):
    
-        from trainer.models import Model as trainerModel
+        
 
         m = trainerModel(
             id = self.model_id,
@@ -166,7 +167,7 @@ class Trainer:
             )
 
         try:
-            
+            # save the model
             m.save()
         except Exception as e:
             raise e
@@ -185,7 +186,6 @@ class AttributeManager:
     """
 
     def __init__(self):
-        
         self.trainer_brand = {b.id:b.brand_name for b in Brand.objects.all()}
         self.trainer_topleveldomain = [t.tld  for t in TopLevelDomain.objects.all()]
         self.trainer_keyword = {kw.id:kw.keyword for kw in KeyWord.objects.all()}
