@@ -24,6 +24,7 @@ from fqdn.views import FQDNInstanceListView
 urlpatterns = [
     url(r'^$', FQDNInstanceListView.as_view(), name='home'),
     path('admin/',  admin.site.urls),
+    path('fqdn',include('fqdn.urls'),name="fqdns"),
     path('trainer/', include('trainer.urls')),
     path('models/', include('modeler.urls'),name="models")
 

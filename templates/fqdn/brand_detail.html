@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="d-flex justify-content-center align-items-center m-3">
+    <div class="d-flex flex-column justify-content-center ">
+        {% load crispy_forms_tags %}
+        
+          
+                    <label>Brand</label>
+                    <td>{{ brand}}</td>
+        <div>
+            <form method="POST">
+                {% csrf_token %}
+      
+                      <div class="form-group">
+                    <label>Tags</label>
+                    <input type="text" data-role="tagsinput" class="form-control" name="tags">
+                </div>
+                
+          
+          
+        </div>
+        <div  class="d-md-inline-flex justify-content-around">
+            <span>
+            <button  class="btn btn-primary" type="submit">Save</button>
+            
+            <a class="btn btn-primary" href="{% url 'view_all_keywords' %}"role="button">Cancel</a>
+        </span>
+        </form>
+        </div>
+            <div class="row p-2 ">
+               
+             
+                <div class="col-md-6">
+
+                        <div style="display:flex">
+                            {% for tag in brand.tags.all %}
+                            <a href="{% url 'kw_tags' tag.slug %}" class="mr-1 badge badge-info">#{{ tag }}</a>
+                            {% endfor %}
+                        </div>
+                        
+                
+                        
+                </div>
+         
+
+            
+        </div>
+         
+        
+</div>
+</div>
+        {% endblock content %}        

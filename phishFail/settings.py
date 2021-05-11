@@ -43,7 +43,8 @@ INSTALLED_APPS = [
     'crispy_forms',
     'modeler',
     'background_task',
-    'django_q'
+    'django_q',
+    'taggit'
 ]
 
 MIDDLEWARE = [

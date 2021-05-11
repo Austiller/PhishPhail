@@ -1,0 +1,68 @@
+
+{% extends "base.html" %}
+
+
+
+{% block content %}
+
+  <div class="d-flex justify-content-center align-items-center m-3">
+    <div class="d-flex flex-column justify-content-center ">
+     
+      <div>
+
+        <div class="container pt-5">
+            <form method="POST">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label>Keyword</label>
+                    <input type="text" class="form-control" name="keyword" placeholder="keyword">
+                </div>
+               
+                <div class="form-group">
+                    <label>Tags</label>
+                    <input type="text" data-role="tagsinput" class="form-control" name="tags">
+                </div>
+                <button type="submit" class="btn btn-primary">Submit</button>
+            </form>
+            <p>Common Tags: 
+            {% for mt in common_tags %}
+                <a href="#" class="badge">{{mt}}</a>
+            {% endfor %}
+            </p>
+            <div class="row mb-2 ">
+                    {% for keyword in keywords %}
+                    <div class="col-md-6">
+
+                        <div class="col d-flex flex-column ">
+                            <h4 class="my-1"><a href="{% url 'view_kw_details' keyword.slug %}">{{keyword.keyword}}</a></h4>
+                            <div style="display:flex">
+                                {% for tag in keyword.tags.all %}
+                                <a href="{% url 'kw_tags' tag.slug %}" class="mr-1 badge badge-info">#{{ tag }}</a>
+                                {% endfor %}
+                            </div>
+                            
+                        </div>
+                           
+                            
+                    </div>
+                    {% endfor %}
+            </div>
+        </div>    
+
+
+
+
+
+
+
+
+
+
+    </div>  
+    
+    
+</div>
+
+
+{% endblock %}
+
