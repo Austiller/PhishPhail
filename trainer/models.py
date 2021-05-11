@@ -6,7 +6,6 @@ from taggit.managers import TaggableManager
 # Need to create view for training set 
 
 
-
 class FQDN(models.Model):
     """Listing of FQDN found and categorized"""
 
@@ -95,8 +94,13 @@ class FQDNInstance(models.Model):
     fqdn_domain = models.CharField(null=True,max_length = 200)
 
 
+    # If the subdomain of the FQDN matches a tracked brand
+
+    #brand_subdomain_match = models.ForeignKey(Brand)
+
     # The date which the FQDN was seen
     date_seen = models.DateTimeField(auto_now_add=True)
+
 
     # The Calculated randomness of the FQDN
     entropy = models.FloatField(default=0.0,null=True)

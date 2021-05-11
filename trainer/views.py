@@ -79,9 +79,7 @@ class FQDNInstanceDetails (UpdateView):
     def get_context_data (self,**kwargs):
         
         context = super(FQDNInstanceDetails,self).get_context_data(**kwargs)
-        context['keywords'] = ["Keyword 1","Keyword 2","Keyword 3"]#[kw.keyword for kw in context['fqdn'].matched_keywords.all()]
-        context['brands'] =  [br.brand_name for br in context['fqdn'].matched_brands.all()]
-
+        
         return context
 
     def form_valid(self, form):

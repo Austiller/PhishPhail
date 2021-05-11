@@ -1,20 +1,11 @@
-import numpy
 from modeler.model import Fqdn
 from os import walk, path
-import math
-import re
+import math, re,logging, tldextract,pickle
 from collections import Counter, OrderedDict
 #from stringdist import levenshtein
 from Levenshtein import distance
-import tldextract
-import numpy as np
-
 from trainer.models import Model as trainerModel
-from psycopg2 import sql
-import numpy
 from collections import OrderedDict, defaultdict
-import logging
-
 from pandas import DataFrame
 from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LogisticRegression
@@ -24,11 +15,11 @@ from sklearn.metrics import precision_recall_curve
 from sklearn.metrics import confusion_matrix
 from datetime import datetime
 from collections import OrderedDict, Counter
-import pickle
 
 #from trainer.models import  Brand, TopLevelDomain, SquatedWord, KeyWord
 from modeler.model import Fqdn
-from fqdn.models import *
+from fqdn.models import KeyWord, TopLevelDomain,SquatedWord
+from trainer.models import FQDN
 
 class Trainer:
     """

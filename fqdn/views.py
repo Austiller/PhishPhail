@@ -1,3 +1,4 @@
+from typing import List
 from django.shortcuts import render
 from .models import KeyWord,Brand,FQDNInstance
 from django.shortcuts import render, HttpResponse, get_object_or_404, HttpResponseRedirect
@@ -8,39 +9,23 @@ from .models import FQDNInstance,KeyWord,Brand,SquatedWord
 # Create your views here.
 from django.template.defaultfilters import slugify
 
+from fqdn import models
 
-def tagged(request, slug):
-    tag = get_object_or_404(Tag, slug=slug)
-    # Filter posts by tag name  
-    keywords = KeyWord.objects.filter(tags=tag)
-    context = {
-        'tag':tag,
-        'posts':keywords,
-    }
-    return render(request, 'home.html', context)
 
-def keyword_details (request):
-    keywords = KeyWord.objects.order_by('keyword')
+class KeyWordListView (ListView):
+    model = KeyWord
+    template_name = 'fqdn/kw_list.html'
+    context_object_name = 'keywords'
+    paginate_by = 100  # if pagination is desired
 
-    common_categories = KeyWord.keyword_tags.most_common()[:3]
-    form = KeyWordForm
-
-    if form.is_valid():
-        new_keyword = form.save(commit=False)
-        new_keyword.slug = slugify(new_keyword.keyword)
-        form.save()
-        form.save_m2m()
-    context = {
-        'keywords':keywords,
-        'common_categories':common_categories,
-        'form':form
-    }
-    return render(request,'fqdn/keyword_form.html')
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        return context
 
 class KeyWordCreateView (CreateView):
     model = KeyWord
     form_class = KeyWordForm
-    template_name = 'trainer/keyword_form.html'
+    template_name = 'fqdn/keyword_form.html'
     def form_valid(self,form):
 
         model = form.save(commit=False)

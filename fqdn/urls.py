@@ -6,7 +6,8 @@ from .views import FQDNInstanceListView
 
 urlpatterns = [
     path('',FQDNInstanceListView.as_view(),name='found_fqdn'),
-    path('<int:pk>/details/', views.FQDNInstanceDetails.as_view(), name='view_fqdn_details'),
+    path('<int:pk>/details/', FQDNInstanceDetails.as_view(), name='view_fqdn_details'),
+    path('keywords/',views.KeyWordListView.as_view(),name="view_all_keywords")
     
 
 ]
