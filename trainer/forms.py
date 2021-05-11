@@ -7,32 +7,7 @@ from django.urls import reverse
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Submit
 
-from trainer.models import Model, FQDNInstance, KeyWord,Brand
-
-
-class KeyWordForm (forms.ModelForm):
-    """
-    
-    Using the Django Form helper to build a form for the model showing the details of the model currently running. 
-    
-    
-    """
-  
-
-    
-    
-    class Meta:
-        model = KeyWord
-        fields = ('keyword','keyword_tags',)
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.helper = FormHelper()
-        
-
-        
-        self.helper.form_method = 'POST'
-        self.helper.add_input(Submit('submit', 'Save'))
+from trainer.models import Model, FQDNInstance
 
 
 class ModelForm(forms.ModelForm):

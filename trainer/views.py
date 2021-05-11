@@ -1,65 +1,18 @@
 from django.shortcuts import render, HttpResponse, get_object_or_404, HttpResponseRedirect
 from django.urls import reverse_lazy, reverse
 from django.views.generic import ListView, CreateView, UpdateView,DetailView
-from trainer.trainer import AttributeManager,Trainer
 from trainer.forms import ModelForm, FQDNInstanceForm
-from trainer.models import Model, FQDNInstance, KeyWord 
-from django import forms
+from trainer.models import Model, FQDNInstance
 import trainer.tasks as tasks
-from fqdn.forms import KeyWordForm
 
 from django.template.defaultfilters import slugify
 
-
-def tagged(request, slug):
-    tag = get_object_or_404(Tag, slug=slug)
-    # Filter posts by tag name  
-    keywords = KeyWord.objects.filter(tags=tag)
-    context = {
-        'tag':tag,
-        'posts':keywords,
-    }
-    return render(request, 'home.html', context)
-
-def keyword_details (request):
-    keywords = KeyWord.objects.order_by('keyword')
-
-    common_categories = KeyWord.keyword_tags.most_common()[:3]
-    form = KeyWordForm(request.POST)
-
-    if form.is_valid():
-        new_keyword = form.save(commit=False)
-        new_keyword.slug = slugify(new_keyword.keyword)
-        form.save()
-        form.save_m2m()
-    context = {
-        'keywords':keywords,
-        'common_categories':common_categories,
-        'form':form
-    }
-    return render(request,'fqdn/keyword_form.html')
 
 
 def updateTrainingData(request):
     context = {}
     return render(request,'trainer/trainer_upload.html',context)
 
-class KeyWordCreateView (CreateView):
-    model = KeyWord
-    form_class = KeyWordForm
-
-    def form_valid(self,form):
-
-        model = form.save(commit=False)
-        model.save()
-
-        # Call keyword update code 
-        # tasks.train_model.delay(model_name=model_name,model_id=model_id,model_description=model_description)
-        
-        return HttpResponseRedirect(self.get_success_url())
-          
-    def get_success_url(self):
-        return reverse_lazy('models')  
 
 
 # Model Form create 

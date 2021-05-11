@@ -7,11 +7,11 @@ import numpy as np
 from psycopg2 import sql
 from collections import OrderedDict, defaultdict
 from datetime import time
-from trainer.models import  Brand, TopLevelDomain, KeyWord, SquatedWord, Model, FQDNInstance
+from trainer.models import  FQDNInstance
 from phishFail.settings import FQDN_THRESHOLD
 from background_task import background
 from trainer.models import Model as SavedModel
-
+from fqdn.models import  Brand, TopLevelDomain, KeyWord, SquatedWord
 
 class Fqdn:
     """

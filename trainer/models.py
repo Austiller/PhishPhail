@@ -7,55 +7,56 @@ from taggit.managers import TaggableManager
 
 
 
+class FQDN(models.Model):
+    """Listing of FQDN found and categorized"""
 
-class Brand(models.Model):
-    """A Model used to define the brand names to be monitored for typo-squating"""
-    brand_name = models.CharField(max_length=200)
+    fqdnType_choices = (
+        ('m','Malicious'),
+        ('b', 'Benign'),
+        ('u', 'Unknown')
+    )
+
+
+    fqdn = models.CharField(max_length=1000)
     
+    fqdn_type = models.CharField(choices=fqdnType_choices,default='u',max_length=25)
 
+    for_training = models.BooleanField("Use For Training",default=False)
+
+    def number_dashes(self):
+        return 0 if "xn--" in self.fqdn else self.count("-")
+
+    def count_periods(self):
+        return self.fqdn.count(".")
+
+    def clean_fqdn(self,prefixes):
+        """Split the FQDN up and removing common web-prefixes, ensures the FQDN used is the root-FQDN only."""
+
+        split_fqdn = self.fqdn(".")
+
+        if len(split_fqdn) > 1:
+            if (split_fqdn[0] in prefixes):
+                return split_fqdn[0]
+            else:
+                return self.fqdn
+
+    def fqdn_parts(self):
+        """Return a dictionary of the FQDN containing Subdomain, domain and TLD"""
+
+        fqdn = tldextract.extract(self.fqdn)
+        return {"domain":fqdn.domain,"subdomain":fqdn.subdomain,"suffix":fqdn.suffix}
+
+    def fqdn_words(self):
+        """ #Split the domain by non-alphanumeric characters."""
+        return re.split("\W+", self.fqdn)
     
-    def __str__(self):
-        return self.name
-
     def __unicode__(self):
-        return self.name
-
-class KeyWord(models.Model):
-    keyword = models.CharField(max_length=200)
-   
-    slug = models.SlugField(unique=True,max_length=64,null=True)
-    keyword_tags = TaggableManager(related_name="trainer_kw_tags")
+        return self.fqdn
 
     def __str__(self):
-        return self.keyword
-
-    def __unicode__(self):
-        return self.keyword
-
-class TopLevelDomain(models.Model):
-    tld = models.CharField(max_length=10)
-   
- 
-
-    def __str__(self):
-        return self.tld
-
-    def __unicode__(self):
-        return self.tld
+        return self.fqdn
 
 
-
-class SquatedWord (models.Model):
-    """Words that are likely to be typosquated."""
-    squated_word = models.CharField(max_length=200)
-    
-
-
-    def __str__(self):
-        return self.squ
-
-    def __unicode__(self):
-        return self.squated_word
 
 class DomainPrefix(models.Model):
     """List of common hosts used by trainer."""
@@ -93,18 +94,9 @@ class FQDNInstance(models.Model):
 
     fqdn_domain = models.CharField(null=True,max_length = 200)
 
-    # If the domain of the FQDN matches a tracked brand
-    matched_brands = models.ManyToManyField(Brand)
-    
-    matched_keywords =  models.ManyToManyField(KeyWord)
-
-    # If the subdomain of the FQDN matches a tracked brand
-
-    #brand_subdomain_match = models.ForeignKey(Brand)
 
     # The date which the FQDN was seen
     date_seen = models.DateTimeField(auto_now_add=True)
-
 
     # The Calculated randomness of the FQDN
     entropy = models.FloatField(default=0.0,null=True)
