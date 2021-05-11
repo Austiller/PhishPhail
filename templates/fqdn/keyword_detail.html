@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="d-flex justify-content-center align-items-center m-3">
+    <div class="d-flex flex-column justify-content-center ">
+            test
+        <h2>{{keyword}}</h2>
+        {% for tag in keyword.tags.all %}
+        <a href="#" class="badge badge-info" >{{ tag }}</a>
+        
+        {% endfor %}
+        
+</div>
+</div>
+        {% endblock content %}        

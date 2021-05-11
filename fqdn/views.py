@@ -8,9 +8,43 @@ from .forms import KeyWordForm
 from .models import FQDNInstance,KeyWord,Brand,SquatedWord
 # Create your views here.
 from django.template.defaultfilters import slugify
-
+from taggit.models import Tag
 from fqdn import models
 
+def tagged_kw(request, slug):
+    tag = get_object_or_404(Tag, slug=slug)
+    common_tags = KeyWord.tags.most_common()[:4]
+    keywords = KeyWord.objects.filter(tags=tag)
+    context = {
+        'tag':tag,
+        'common_tags':common_tags,
+        'keywords':keywords,
+    }
+    return render(request, 'fqdn/keyword_list.html', context)
+
+
+def keyword_list(request):
+    keywords = KeyWord.objects.all()
+    common_tags = KeyWord.tags.most_common()[:4]
+    form = KeyWordForm(request.POST)
+    if form.is_valid():
+        new_kw = form.save(commit=False)
+        new_kw.slug = slugify(new_kw.keyword)
+        new_kw.save()
+        form.save_m2m()
+    context = {
+        'keywords':keywords,
+        'common_tags':common_tags,
+        'form':form,
+    }
+    return render(request, 'fqdn/keyword_list.html', context)
+
+def kw_detail_view(request, slug):
+    kw = get_object_or_404(KeyWord, slug=slug)
+    context = {
+        'keyword':kw,
+    }
+    return render(request, 'fqdn/keyword_detail.html', context)
 
 class KeyWordListView (ListView):
     model = KeyWord
@@ -20,6 +54,16 @@ class KeyWordListView (ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        return context
+
+class KeyWordDetailView (UpdateView):
+    model = KeyWord
+    form_class = KeyWordForm
+    template_name = 'fqdn/keyword.html'
+    context_object_name = 'keyword'
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        
         return context
 
 class KeyWordCreateView (CreateView):

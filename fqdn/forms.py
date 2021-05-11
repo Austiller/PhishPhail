@@ -7,26 +7,20 @@ from crispy_forms.layout import Submit
 
 from .models import FQDNInstance, KeyWord,Brand
 
-class KeyWordForm (forms.ModelForm):
-    """
-    
-    Using the Django Form helper to build a form for the model showing the details of the model currently running. 
-    
-    
-    """
-  
 
-    
-    
+
+class KeyWordForm(forms.ModelForm):
     class Meta:
         model = KeyWord
-        fields = ('keyword','keyword_tags')
+        fields = [
+            'keyword',
+            'tags',
+        ]
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.helper = FormHelper()
-        
-
-        
-        self.helper.form_method = 'POST'
-        self.helper.add_input(Submit('submit', 'Save'))
+class BrandForm(forms.ModelForm):
+    class Meta:
+        model = Brand
+        fields = [
+            'brand_name',
+             'tags',
+        ]

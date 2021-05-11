@@ -11,7 +11,7 @@ class Brand(models.Model):
     """A Model used to define the brand names to be monitored for typo-squating"""
     brand_name = models.CharField(max_length=200)
     slug = models.SlugField(unique=True,max_length=64,null=True)
-    brand_tags = TaggableManager()
+    tags = TaggableManager()
 
     
     def __str__(self):
@@ -22,9 +22,9 @@ class Brand(models.Model):
 
 class KeyWord(models.Model):
     keyword = models.CharField(max_length=200)
-   # keyword_tag = models.ManyToManyField(Tag)
+  
     slug = models.SlugField(unique=True,max_length=64,null=True)
-    keyword_tags = TaggableManager(related_name="fqdn_kw_tags")
+    tags = TaggableManager(related_name="fqdn_kw_tags")
 
     def __str__(self):
         return self.keyword
@@ -35,7 +35,7 @@ class KeyWord(models.Model):
 class TopLevelDomain(models.Model):
     tld = models.CharField(max_length=10)
     slug = models.SlugField(unique=True,max_length=64,null=True)
-    tld_tags = TaggableManager()
+    tags = TaggableManager()
     
 
     def __str__(self):
@@ -50,7 +50,7 @@ class SquatedWord (models.Model):
     """Words that are likely to be typosquated."""
     squated_word = models.CharField(max_length=200)
     slug = models.SlugField(unique=True,max_length=64,null=True)
-    squated_word_tags = TaggableManager()
+    tags = TaggableManager()
 
 
     def __str__(self):
@@ -64,7 +64,7 @@ class DomainPrefix(models.Model):
 
     domain_prefix = models.CharField(max_length=50)
     slug = models.SlugField(unique=True,max_length=64,null=True)
-   
+    
 
     def get_prefixes(self):
         return self.domain_prefix
@@ -87,7 +87,7 @@ class FQDNInstance(models.Model):
     fqdn_tested =  models.CharField(max_length=512,null=True)
     fqdn_type = models.CharField(max_length=25,null=True)
     score = models.FloatField(null=True,default=0.0)
-
+    tags = TaggableManager()
     # The name of the model used to match the FQDN
     model_match = models.CharField(max_length=128,null=True)
     fqdn_subdomain = models.CharField(null=True,max_length=200)
