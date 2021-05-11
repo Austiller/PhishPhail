@@ -10,20 +10,20 @@ from taggit.managers import TaggableManager
 class Brand(models.Model):
     """A Model used to define the brand names to be monitored for typo-squating"""
     brand_name = models.CharField(max_length=200)
-    slug = models.SlugField(unique=True,max_length=64,null=True)
+    slug = models.SlugField(unique=True,max_length=64,null=False)
     tags = TaggableManager()
 
     
     def __str__(self):
-        return self.name
+        return self.brand_name
 
     def __unicode__(self):
-        return self.name
+        return self.brand_name
 
 class KeyWord(models.Model):
     keyword = models.CharField(max_length=200)
   
-    slug = models.SlugField(unique=True,max_length=64,null=True)
+    slug = models.SlugField(unique=True,max_length=64,null=False)
     tags = TaggableManager(related_name="fqdn_kw_tags")
 
     def __str__(self):

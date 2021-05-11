@@ -27,7 +27,6 @@ class ModelForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         self.helper = FormHelper()
     
-
         #self.helper.fields['accuracy_training_set'].widget.attrs['readyonly'] = True
         self.helper.form_method = 'POST'
         self.helper.add_input(Submit('submit', 'Save Model'))

@@ -6,8 +6,8 @@
         {% load crispy_forms_tags %}
         
           
-                    <label>Keyword</label>
-                    <td>{{ keyword}}</td>
+                    <label>Brand</label>
+                    <td>{{ brand}}</td>
         <div>
             <form method="POST">
                 {% csrf_token %}
@@ -34,7 +34,7 @@
                 <div class="col-md-6">
 
                         <div style="display:flex">
-                            {% for tag in keyword.tags.all %}
+                            {% for tag in brand.tags.all %}
                             <a href="{% url 'kw_tags' tag.slug %}" class="mr-1 badge badge-info">#{{ tag }}</a>
                             {% endfor %}
                         </div>

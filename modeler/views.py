@@ -84,7 +84,7 @@ class ModelEdit (UpdateView):
     def form_valid(self, form):
         model = form.save(commit=True)
         request = self.request
-
+        
         return HttpResponseRedirect(reverse('models'))
 
 
