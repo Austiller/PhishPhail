@@ -1,17 +1,11 @@
-from os import walk, path
 import math, re,tldextract,logging,pickle
 from collections import Counter, OrderedDict
 #from stringdist import levenshtein
-from Levenshtein import distance
-import numpy as np
-from psycopg2 import sql
-from collections import OrderedDict, defaultdict
+#from Levenshtein import distance
+from collections import OrderedDict
 from datetime import time
 from trainer.models import  FQDNInstance
 from phishFail.settings import FQDN_THRESHOLD
-from background_task import background
-from trainer.models import Model as SavedModel
-from fqdn.models import  Brand, TopLevelDomain, KeyWord, SquatedWord
 
 class Fqdn:
     """

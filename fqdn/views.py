@@ -5,8 +5,8 @@ from .models import KeyWord,Brand,FQDNInstance
 from django.shortcuts import render, HttpResponse, get_object_or_404, HttpResponseRedirect
 from django.urls import reverse_lazy, reverse
 from django.views.generic import ListView, CreateView, UpdateView,DetailView
-from .forms import BrandForm, KeyWordForm
-from .models import FQDNInstance,KeyWord,Brand,SquatedWord
+from fqdn.forms import BrandForm, KeyWordForm
+from fqdn.models import FQDNInstance,KeyWord,Brand,SquatedWord
 # Create your views here.
 from django.template.defaultfilters import slugify
 from taggit.models import Tag
