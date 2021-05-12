@@ -1,6 +1,9 @@
 import os
 
 from celery import Celery
+from celery.schedules import crontab
+
+
 
 # set the default Django settings environmental variable for celery command line
 # Not needed
@@ -20,6 +23,10 @@ app.autodiscover_tasks()
 @app.task(bind=True)
 def debug_task(self):
     print(f'Request: {self.request!r}')
+
+
+
+
 
 if __name__ == '__main__':
     app.start()

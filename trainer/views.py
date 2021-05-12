@@ -44,7 +44,7 @@ class FQDNInstanceListView(ListView):
     model = FQDNInstance
     paginate_by = 20        
     context_object_name = 'fqdn_list'
-    
+    ordering = ['+date_seen']
     def get_context_data (self,**kwargs):
         
         context = super(FQDNInstanceListView,self).get_context_data(**kwargs)
@@ -91,7 +91,7 @@ class FQDNInstanceDetails (UpdateView):
         return  HttpResponseRedirect(self.get_success_url())
    
     def get_success_url(self):
-        return reverse_lazy('home')  
+        return reverse_lazy('training_set')  
 
 def homeView(request):
     context = {}

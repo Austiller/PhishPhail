@@ -2,8 +2,7 @@ from django.db import models
 # Create your models here.
 from taggit.managers import TaggableManager
 
-
-
+from django.db.models import  UniqueConstraint
 
 
 
@@ -77,7 +76,7 @@ class DomainPrefix(models.Model):
 
 
 
-
+# Change name to FoundFQDN
 class FQDNInstance(models.Model):
 
   
@@ -85,7 +84,7 @@ class FQDNInstance(models.Model):
     fqdn_tested =  models.CharField(max_length=512,null=True)
     fqdn_type = models.CharField(max_length=25,null=True)
     score = models.FloatField(null=True,default=0.0)
-    tags = TaggableManager()
+
     model_match = models.CharField(max_length=128,null=True)
     fqdn_subdomain = models.CharField(null=True,max_length=200)
     fqdn_domain = models.CharField(null=True,max_length = 200)
@@ -96,7 +95,30 @@ class FQDNInstance(models.Model):
     
     # If the domain of the FQDN matches a tracked brand
     matched_brands = models.ManyToManyField(Brand)
-    
     matched_keywords =  models.ManyToManyField(KeyWord)
+    
+    tags = TaggableManager()
     # The Calculated randomness of the FQDN
     entropy = models.FloatField(default=0.0,null=True)
+
+    class Meta:
+        constraints = [ UniqueConstraint(fields=['fqdn_full'], name='unique_found_fqdn')]
+
+    
+    def check_keyword(self,keywords):
+        for obj in keywords:
+            if obj.keyword in self.fqdn_subdomain:
+                yield obj.id
+            elif obj.keyword in self.fqdn_domain:
+                yield obj.id
+            else:
+                continue
+    
+    def check_brand (self,brands):
+        for obj in brands:
+            if obj.brand_name in self.fqdn_subdomain:
+                yield obj.id 
+            elif obj.brand_name in self.fqdn_domain:
+                yield obj.id
+            else:
+                continue
