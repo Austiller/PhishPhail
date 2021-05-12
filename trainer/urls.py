@@ -1,5 +1,5 @@
 from django.urls import path
-from . import views
+from trainer import views
 from django.urls import include
 
 

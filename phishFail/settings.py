@@ -28,10 +28,9 @@ DEBUG = True
 ALLOWED_HOSTS = ['127.0.0.1']
 
 
-# Application definition
-import background_task
 
 INSTALLED_APPS = [
+   
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -42,10 +41,10 @@ INSTALLED_APPS = [
     'fqdn',
     'crispy_forms',
     'modeler',
-    'background_task',
-    'django_q',
+
     'taggit'
 ]
+
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',

@@ -7,11 +7,11 @@
         
           
                     <label>Brand</label>
-                    <td>{{ brand}}</td>
+                    <h3>{{ brand}}</h3>
         <div>
             <form method="POST">
                 {% csrf_token %}
-      
+
                       <div class="form-group">
                     <label>Tags</label>
                     <input type="text" data-role="tagsinput" class="form-control" name="tags">
@@ -24,7 +24,7 @@
             <span>
             <button  class="btn btn-primary" type="submit">Save</button>
             
-            <a class="btn btn-primary" href="{% url 'view_all_keywords' %}"role="button">Cancel</a>
+            <a class="btn btn-primary" href="{% url 'view_all_brands' %}"role="button">Cancel</a>
         </span>
         </form>
         </div>
@@ -35,7 +35,7 @@
 
                         <div style="display:flex">
                             {% for tag in brand.tags.all %}
-                            <a href="{% url 'kw_tags' tag.slug %}" class="mr-1 badge badge-info">#{{ tag }}</a>
+                            <a href="{% url 'brand_tags' tag.slug %}" class="mr-1 badge badge-info">#{{ tag }}</a>
                             {% endfor %}
                         </div>
                         

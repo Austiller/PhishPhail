@@ -1,16 +1,11 @@
-from django.shortcuts import render, HttpResponse, get_object_or_404,reverse,HttpResponseRedirect
+from django.shortcuts import render, HttpResponse, reverse,HttpResponseRedirect
 from django.http import JsonResponse
 from django.urls import reverse_lazy
-from django.views.generic import ListView, CreateView, UpdateView, DetailView,DeleteView
-# Create your views here.
-from background_task import background
-from modeler.forms import  ExecuteModel
+from django.views.generic import   UpdateView, DeleteView
 from trainer.models import Model
-import trainer.views as tViews
 from modeler.forms import ModelEdit
-from background_task.models import CompletedTask
 from os import system
-from .models import * 
+from modeler.models import * 
 from trainer.models import FQDNInstance
 import csv
 from modeler.tasks import start_model
@@ -84,7 +79,7 @@ class ModelEdit (UpdateView):
     def form_valid(self, form):
         model = form.save(commit=True)
         request = self.request
-        
+
         return HttpResponseRedirect(reverse('models'))
 
 

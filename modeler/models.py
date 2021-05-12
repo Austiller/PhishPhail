@@ -1,5 +1,5 @@
 from django.db import models
-from trainer.models import Model
+
 # Create your models here.
 
 

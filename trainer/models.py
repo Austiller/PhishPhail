@@ -75,28 +75,18 @@ class DomainPrefix(models.Model):
 
 class FQDNInstance(models.Model):
 
-    #The FQDN
-   # fqdn_full = models.ForeignKey(FQDN, null=False, on_delete=models.CASCADE)
-
     fqdn_full = models.CharField(max_length=512,null=True)
     fqdn_tested =  models.CharField(max_length=512,null=True)
 
     fqdn_type = models.CharField(max_length=25,null=True)
-
     
     score = models.FloatField(null=True,default=0.0)
 
     # The name of the model used to match the FQDN
     model_match = models.CharField(max_length=128,null=True)
-
     fqdn_subdomain = models.CharField(null=True,max_length=200)
-
     fqdn_domain = models.CharField(null=True,max_length = 200)
 
-
-    # If the subdomain of the FQDN matches a tracked brand
-
-    #brand_subdomain_match = models.ForeignKey(Brand)
 
     # The date which the FQDN was seen
     date_seen = models.DateTimeField(auto_now_add=True)
