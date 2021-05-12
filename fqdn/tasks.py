@@ -6,24 +6,32 @@ from trainer.models import FQDNInstance as TfqdnInstance
 from threading import Thread
 from fqdn.models import FQDNInstance,KeyWord,Brand
 from concurrent.futures import ThreadPoolExecutor,as_completed
-
+from django.db.utils import IntegrityError
 
 def check_for_matches (fqdn,keywords,brands):
-   
-
-    f_fqdn = FQDNInstance(fqdn_full=fqdn.fqdn_full,fqdn_tested=fqdn.fqdn_tested,score=fqdn.score,model_match=fqdn.model_match,
-                            fqdn_subdomain=fqdn.fqdn_subdomain,fqdn_domain=fqdn.fqdn_domain)
-   
-    f_fqdn.save()
-
+    
+    
+    f_fqdn = FQDNInstance(fqdn_full=fqdn.fqdn_full,fqdn_tested=fqdn.fqdn_tested,score=fqdn.score,fqdn_type=fqdn.fqdn_type,
+                            model_match=fqdn.model_match,fqdn_subdomain=fqdn.fqdn_subdomain,fqdn_domain=fqdn.fqdn_domain)
+            
+    try:
+        f_fqdn.save()
+        fqdn.delete()
+    except IntegrityError:
+        fqdn.delete()
+        return 1
     matched_brands = [b for b in f_fqdn.check_brand(brands)]
-    matched_keywords = [b for b in f_fqdn.check_keyword(keywords)]
-    f_fqdn.matched_brands.add(*matched_brands)
-    f_fqdn.matched_keywords.add(*matched_keywords)
+    matched_keywords = [b for b in f_fqdn.check_keyword(keywords)] 
+    if len(matched_keywords) > 1:
+        f_fqdn.matched_keywords.add(*matched_keywords)
+
+    if len(matched_brands) > 1:
+        f_fqdn.matched_brands.add(*matched_brands)
+
     f_fqdn.save()
+    fqdn.delete()
 
-
-    return fqdn
+    return 1
     
 @app.task(name="fetch_found_fqdn")
 def fetch_found_fqdn (*args):
@@ -39,22 +47,7 @@ def fetch_found_fqdn (*args):
     brands = Brand.objects.all()
     
 
-   # fqdn_list = [fqdn_list[i * fls:(i + 1) * fls] for i in range((len(fqdn_list) + fls - 1) // fls )] 
-
-    with ThreadPoolExecutor(max_workers=5) as thread_pool:
-        # Transfer the model
-
-        future_results = [thread_pool.submit(check_for_matches,fqdn,keywords,brands) for fqdn in fqdn_list ]
-        
-        for future in as_completed(future_results):
-            #fqdn_del = future_results[future]
-            try:
-                result = future.result()
-            except Exception as e:
-                raise e
-            else:
-                result.delete()
-
+    fqdn_list = [check_for_matches(fqdn,keywords,brands) for fqdn in fqdn_list] 
 
 
 
@@ -64,6 +57,6 @@ def fetch_found_fqdn (*args):
 @app.on_after_finalize.connect
 def setup_periodic_tasks(sender, **kwargs):
     
-    sender.add_periodic_task(10.0, fetch_found_fqdn.s(), name='match_fqdn_every_30')
+    sender.add_periodic_task(60.0, fetch_found_fqdn.s(), name='match_fqdn_every_30')
 
   

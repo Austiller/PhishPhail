@@ -2,8 +2,7 @@ from django.db import models
 # Create your models here.
 from taggit.managers import TaggableManager
 
-
-
+from django.db.models import  UniqueConstraint
 
 
 
@@ -102,8 +101,10 @@ class FQDNInstance(models.Model):
     # The Calculated randomness of the FQDN
     entropy = models.FloatField(default=0.0,null=True)
 
-    
+    class Meta:
+        constraints = [ UniqueConstraint(fields=['fqdn_full'], name='unique_found_fqdn')]
 
+    
     def check_keyword(self,keywords):
         for obj in keywords:
             if obj.keyword in self.fqdn_subdomain:

@@ -1,0 +1,57 @@
+
+
+
+{% extends "base.html" %}
+
+{% load crispy_forms_tags %}
+
+
+
+{% block content %}
+
+  <div class="d-flex flex-column align-items-center justify-content-center w-100 p-3">
+   
+
+    <form method="post">
+      {% csrf_token %}
+    <div  class=" align-items-center  w-100">
+      <table   class="table">
+          <thead class="thead-dark">
+            <tr>
+              <th>FQDN</th>
+              <th>Score</th>
+              <th>Type</th>
+              <th>Domain</th>
+              <th>SubDomain</th>
+            </tr>
+          </thead>
+          <tbody>
+        
+              <tr>
+              <td>{{ fqdn.fqdn_full }}</a></td>
+              <td>{{ fqdn.score }}</td>
+              <td>{{ form.fqdn_type|as_crispy_field}}</td>
+              <td>{{ fqdn.fqdn_domain }}</td>
+              <td>{{ fqdn.fqdn_subdomain }}</td>
+              </tr>
+     
+          </tbody>
+        </table>
+
+        
+  
+
+          <div  class="d-flex justify-content-between">
+       
+        <button type="submit" class="btn btn-primary">Save</button>
+          <a href="{% url 'home' %}" role="button" class="p-3">Cancel</a>
+        
+        </div>
+
+      </form>
+  <div>
+
+{% endblock %}
+
+
+

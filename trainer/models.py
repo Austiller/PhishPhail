@@ -1,10 +1,8 @@
 from django.db import models
 import re
 import tldextract
-from collections import Counter
-from taggit.managers import TaggableManager
 # Need to create view for training set 
-from fqdn.models import Brand,KeyWord
+from django.db.models import  UniqueConstraint
 
 class FQDN(models.Model):
     """Listing of FQDN found and categorized"""
@@ -90,8 +88,8 @@ class FQDNInstance(models.Model):
     # The Calculated randomness of the FQDN
     entropy = models.FloatField(default=0.0,null=True)
 
-    
-
+   
+        
 class Model (models.Model):
     # Name of the Model
     model_name = models.CharField(default=False,max_length=128,null=False)
