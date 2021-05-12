@@ -1,12 +1,12 @@
 from django.urls import path
 from . import views
 from django.urls import include
-from trainer.views import FQDNInstanceDetails
+
 from .views import FQDNInstanceListView, kw_detail_view 
 
 urlpatterns = [
     path('',FQDNInstanceListView.as_view(),name='found_fqdn'),
-    path('<int:pk>/details/', FQDNInstanceDetails.as_view(), name='view_fqdn_details'),
+    path('<int:pk>/details/', views.FQDNInstanceDetails.as_view(), name='view_fqdn_details'),
     path('keywords/',views.keyword_list,name="view_all_keywords"),
     path('keywords/<slug:slug>/details',views.kw_detail_view,name="view_kw_details"),
     path('tag/<slug:slug>',views.tagged_kw,name="all_tags"),

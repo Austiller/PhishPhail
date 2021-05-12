@@ -9,7 +9,7 @@
 
 {% block content %}
 
-  <div class="d-flex flex-column align-items-center justify-content-center w-50 p-3">
+  <div class="d-flex flex-column align-items-center justify-content-center w-100 p-3">
    
  
    
@@ -45,50 +45,8 @@
           </tbody>
         </table>
 
-        <th> <a href="{% url 'create_kw' %}" role="button">Keyword+</a></th>
-       <table   class="table">
-          <thead class="thead-dark">
-            <tr>
-              <th >Keyword</th>
-              
-            </tr>
-          </thead>
-          <tbody>
-             {% for kw in keywords %}
-              <tr>
-                <td>{{ kw}}</a></td>
-         
-              </tr>
-              {% empty %}
-              <tr class="table-active">
-                <td colspan="3">None Found</td>
-                
-              </tr>
-              {% endfor %}
-          </tbody>
-        </table>
-
-          <table  class="table">
-          <thead class="thead-dark">
-            <tr>
-              <th>Brands</th>
-            </tr>
-          </thead>
-          <tbody >
-             {% for br in brands %}
-              <tr>
-              <td>{{ br}}</a></td>
-         
-              </tr>
-              {% empty %}
-              <tr class="table-active">
-                <td colspan="3">None Found</td>
-              </tr>
-              {% endfor %}
-          </tbody>
-        </table>
-        </div>
-    
+        
+  
 
           <div  class="d-flex justify-content-between">
        

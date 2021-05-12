@@ -4,7 +4,7 @@ import tldextract
 from collections import Counter
 from taggit.managers import TaggableManager
 # Need to create view for training set 
-
+from fqdn.models import Brand,KeyWord
 
 class FQDN(models.Model):
     """Listing of FQDN found and categorized"""
@@ -79,21 +79,18 @@ class FQDNInstance(models.Model):
     fqdn_tested =  models.CharField(max_length=512,null=True)
 
     fqdn_type = models.CharField(max_length=25,null=True)
-    
     score = models.FloatField(null=True,default=0.0)
 
     # The name of the model used to match the FQDN
     model_match = models.CharField(max_length=128,null=True)
     fqdn_subdomain = models.CharField(null=True,max_length=200)
     fqdn_domain = models.CharField(null=True,max_length = 200)
-
-
-    # The date which the FQDN was seen
-    date_seen = models.DateTimeField(auto_now_add=True)
-
-
+    
+  
     # The Calculated randomness of the FQDN
     entropy = models.FloatField(default=0.0,null=True)
+
+    
 
 class Model (models.Model):
     # Name of the Model
@@ -110,7 +107,7 @@ class Model (models.Model):
 
     accuracy_precision = models.FloatField(null=True,default=0.0)
 
- 
+
     # Accuracy of the model
     accuracy_training_set = models.FloatField(null=True,default=0.0)
     accuracy_test_set =  models.FloatField(null=True,default=0.0)

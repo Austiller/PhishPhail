@@ -11,7 +11,7 @@ from fqdn.models import FQDNInstance,KeyWord,Brand,SquatedWord
 from django.template.defaultfilters import slugify
 from taggit.models import Tag
 from fqdn import models
-
+from trainer.forms import FQDNInstanceForm
 
 def tagged_kw(request, slug):
     tag = get_object_or_404(Tag, slug=slug)
@@ -161,3 +161,28 @@ class FQDNInstanceListView(ListView):
 
     def  get_queryset(self):
         return FQDNInstance.objects.all().filter(score__gte=0.75)
+
+
+class FQDNInstanceDetails (UpdateView):
+    model =  FQDNInstance
+    form_class = FQDNInstanceForm
+    context_object_name = 'fqdn'
+    template_name = 'trainer/fqdninstance_detail.html'
+    
+   # form_class  = FQDNInstanceForm
+    def get_context_data (self,**kwargs):
+        
+        context = super(FQDNInstanceDetails,self).get_context_data(**kwargs)
+        
+        return context
+
+    def form_valid(self, form):
+        model = form.save(commit=True)
+        model.save()
+
+        # Need to develop a thing that if the model fails to be created it removes the entry
+        
+        return  HttpResponseRedirect(self.get_success_url())
+   
+    def get_success_url(self):
+        return reverse_lazy('training_set')  

@@ -1,6 +1,6 @@
 from modeler.model import Fqdn
 from os import walk, path
-import math, re,logging, tldextract,pickle
+import math, re,logging, tldextract,pickle,numpy
 from collections import Counter, OrderedDict
 #from stringdist import levenshtein
 from Levenshtein import distance
@@ -18,7 +18,7 @@ from collections import OrderedDict, Counter
 
 #from trainer.models import  Brand, TopLevelDomain, SquatedWord, KeyWord
 from modeler.model import Fqdn
-from fqdn.models import KeyWord, TopLevelDomain,SquatedWord
+from fqdn.models import KeyWord, TopLevelDomain,SquatedWord,Brand
 from trainer.models import FQDN
 
 class Trainer:
