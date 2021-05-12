@@ -15,21 +15,48 @@ class KeyWordForm(forms.ModelForm):
     class Meta:
         model = KeyWord
         fields = [
-
+            'keyword',
             'tags',
         ]
-
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.helper = FormHelper()
         self.helper.form_method = 'POST'
         self.helper.add_input(Submit('submit', 'Save Keyword'))
 
+class KeywordUpdate(forms.ModelForm):
+    #tag = forms.CharField(max_length=128)
+
+    class Meta:
+        model = KeyWord
+        fields = [
+            'tags',
+        ]
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.helper = FormHelper()
+        self.helper.form_method = 'POST'
+        self.helper.add_input(Submit('submit', 'Save Keyword'))
+
+class BrandUpdate(forms.ModelForm):
+    class Meta:
+        model = Brand
+        fields = [
+             'tags',
+        ]
+    
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.helper = FormHelper()
+        self.helper.form_method = 'POST'
+        self.helper.add_input(Submit('submit', 'Save Keyword'))
+
+
 class BrandForm(forms.ModelForm):
     class Meta:
         model = Brand
         fields = [
-            
+             'brand_name',
              'tags',
         ]
     

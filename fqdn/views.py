@@ -5,7 +5,7 @@ from .models import KeyWord,Brand,FQDNInstance
 from django.shortcuts import render, HttpResponse, get_object_or_404, HttpResponseRedirect
 from django.urls import reverse_lazy, reverse
 from django.views.generic import ListView, CreateView, UpdateView,DetailView
-from fqdn.forms import BrandForm, KeyWordForm
+from fqdn.forms import BrandForm, KeyWordForm, KeywordUpdate
 from fqdn.models import FQDNInstance,KeyWord,Brand,SquatedWord
 # Create your views here.
 from django.template.defaultfilters import slugify
@@ -35,66 +35,58 @@ def tagged_brands(request, slug):
     }
     return render(request, 'fqdn/brand_list.html', context)
 
+def brand_update (request,slug):
+    return
 
-class BrandDetailView (UpdateView):
-    model =  Brand
-    form_class = BrandForm
-    context_object_name = 'brand'
-    template_name = 'fqdn/brand_detail.html'
+
+ 
+
+
+def brand_detail(request, slug):
+    brand = get_object_or_404(Brand, slug=slug)
+    common_tags = brand.tags.most_common()[:4]
     
-   # form_class  = FQDNInstanceForm
-    def get_context_data (self,**kwargs):
-        context = super(BrandDetailView,self).get_context_data(**kwargs)
-        context['tags'] = context['brand'].tags.most_common()[:4]
-        return context
+    form = KeywordUpdate(request.POST)
 
-    def form_valid(self, form):
-       # curr_tags = self.object.tags.names()
-        new_kw = form.save(commit=False)
-        #input(new_kw.data.cleaned_data['tags'])
-        new_kw.slug = slugify(new_kw.brand_name)
-        new_kw.brand_name = new_kw.brand_name
+    if request.method == "POST":
         
-        new_kw.save()
-        form.save_m2m()
-        
+        if form.is_valid():
+            brand.brand_name = brand.brand_name
+            brand.tags.add(*form.cleaned_data['tags'])
+            brand.save()
+    context = {
+        'brand':brand,
+        'common_tags':common_tags,
+        'form':form,
 
-        # Need to develop a thing that if the model fails to be created it removes the entry
+    }
         
-        return  HttpResponseRedirect(self.get_success_url())
+        
+    return render(request, 'fqdn/brand_detail.html', context)
    
-    def get_success_url(self):
-        return reverse_lazy('view_all_brands')  
-
-class BrandCreateView (CreateView):
-    model = Brand
-    form_class = BrandForm
-    template_name = 'fqdn/brand_form.html'
-    def form_valid(self,form):
-
-        model = form.save(commit=False)
-        model.save()
-        
-        return HttpResponseRedirect(self.get_success_url())
-          
-    def get_success_url(self):
-        return reverse_lazy('models')  
 
 
 def brand_list(request):
     brands = Brand.objects.all()
     common_tags = Brand.tags.most_common()[:4]
+  
     form = BrandForm(request.POST)
-    if form.is_valid():
-        new_brand = form.save(commit=False)
-        new_brand.slug = slugify(new_brand.brand_name)
-        new_brand.save()
-        form.save_m2m()
     context = {
         'brands':brands,
         'common_tags':common_tags,
         'form':form,
     }
+    
+    if request.method == "POST":
+        if form.is_valid():   
+            new_brand = form.save(commit=False)
+            new_brand.slug = slugify(new_brand.brand_name)
+            new_brand.save()
+            
+            form.save_m2m()
+        else:
+            return HttpResponse(form.errors)
+  
     return render(request, 'fqdn/brand_list.html', context)
 
 
@@ -115,49 +107,19 @@ def keyword_list(request):
     }
     return render(request, 'fqdn/keyword_list.html', context)
 
-class KwDetailView (UpdateView):
-    model =  KeyWord
-    form_class = KeyWordForm
-    context_object_name = 'keyword'
-    template_name = 'fqdn/keyword_detail.html'
-    
-   # form_class  = FQDNInstanceForm
-    def get_context_data (self,**kwargs):
-        context = super(KwDetailView,self).get_context_data(**kwargs)
-        context['tags'] = context['keyword'].tags.most_common()[:4]
-        return context
-
-    def form_valid(self, form):
-       # curr_tags = self.object.tags.names()
-        new_kw = form.save(commit=False)
-        #input(new_kw.data.cleaned_data['tags'])
-        new_kw.slug = slugify(new_kw.keyword)
-        new_kw.keyword = new_kw.keyword
-        
-        new_kw.save()
-        form.save_m2m()
-        
-
-        # Need to develop a thing that if the model fails to be created it removes the entry
-        
-        return  HttpResponseRedirect(self.get_success_url())
-   
-    def get_success_url(self):
-        return reverse_lazy('view_all_keywords')  
-
 
 def kw_detail_view(request, slug):
     kw = get_object_or_404(KeyWord, slug=slug)
     common_tags = kw.tags.most_common()[:4]
     
-    form = KeyWordForm(request.POST)
+    form = KeywordUpdate(request.POST)
 
-    #if request.method == "POST":
-    if form.is_valid():
-        new_kw = form.save(commit=False)
-        new_kw.slug = slugify(new_kw.keyword)
-        new_kw.save()
-        form.save_m2m()
+    if request.method == "POST":
+        
+        if form.is_valid():
+            kw.keyword = kw.keyword
+            kw.tags.add(*form.cleaned_data['tags'])
+            kw.save()
     context = {
         'keyword':kw,
         'common_tags':common_tags,
@@ -170,29 +132,6 @@ def kw_detail_view(request, slug):
    
 
 
-class KeyWordDetailView (UpdateView):
-    model = KeyWord
-    form_class = KeyWordForm
-    template_name = 'fqdn/keyword.html'
-    context_object_name = 'keyword'
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        
-        return context
-
-class KeyWordCreateView (CreateView):
-    model = KeyWord
-    form_class = KeyWordForm
-    template_name = 'fqdn/keyword_form.html'
-    def form_valid(self,form):
-
-        model = form.save(commit=False)
-        model.save()
-        
-        return HttpResponseRedirect(self.get_success_url())
-          
-    def get_success_url(self):
-        return reverse_lazy('models')  
 
 class FQDNInstanceListView(ListView):
     model = FQDNInstance

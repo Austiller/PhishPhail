@@ -4,29 +4,29 @@
 
 
 {% block content %}
-
+{% load crispy_forms_tags %}
   <div class="d-flex justify-content-center align-items-center m-3">
     <div class="d-flex flex-column justify-content-center ">
      
       <div>
 
         <div class="container pt-5">
-            <form method="POST">
+            <form method="POST" enctype= multipart/form-data>
                 {% csrf_token %}
                 <div class="form-group">
-                    <label>Brand</label>
-                    <input type="text" class="form-control" name="Brand" placeholder="Brand">
+                    <label for="brand_name">Brand Name</label>
+                    {{form.brand_name|as_crispy_field}}
                 </div>
                
                 <div class="form-group">
-                    <label>Tags</label>
-                    <input type="text" data-role="tagsinput" class="form-control" name="tags">
+                    <label for="tags">Tags</label>
+                    <input type="text" data-role="tagsinput" class="form-control" name="tags" id="tags">
                 </div>
                 <button type="submit" class="btn btn-primary">Submit</button>
             </form>
             <p>Common Tags: 
-            {% for mt in common_tags %}
-                <a href="#" class="badge">{{mt}}</a>
+            {% for mct in common_tags %}
+                <a href="{% url 'brand_tags' mct.slug %}" class="badge">{{mct}}</a>
             {% endfor %}
             </p>
             <div class="row mb-2 ">
