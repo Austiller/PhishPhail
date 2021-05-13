@@ -27,7 +27,7 @@
         <div class="container pt-5 w-75">
             <p>Common Tags: 
             {% for mt in common_tags %}
-                <a href="#" class="badge">{{mt|title}}</a>
+                <a href="{% url 'kw_tags' mt.slug %}" class="badge">{{mt|title}}</a>
             {% endfor %}
             </p>
             <div class="row mb-2 ">
