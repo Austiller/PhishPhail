@@ -33,7 +33,7 @@
             "label": "start celery",
             "type": "shell",
             "command": [
-                "celery multi start w1 -A phishFail -l INFO"
+                "celery -A phishFail worker --loglevel=info"
             ],
             "problemMatcher": []
         },
@@ -42,6 +42,14 @@
             "type": "shell",
             "command": [
                 "celery multi stop w1 -A phishFail -l INFO"
+            ],
+            "problemMatcher": []
+        },
+        {
+            "label": "Start beat",
+            "type": "shell",
+            "command": [
+                "celery -A phishFail beat -l info --scheduler django_celery_beat.schedulers:DatabaseScheduler"
             ],
             "problemMatcher": []
         },

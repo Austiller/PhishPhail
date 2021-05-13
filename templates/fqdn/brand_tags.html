@@ -9,26 +9,10 @@
     <div class="d-flex flex-column justify-content-center ">
      
       <div>
-        <a href="{% url 'refresh_brands'  %}" class="badge">Update All Brands</a>
-        <div class="container pt-5 w-50">
-            <form method="POST" enctype= multipart/form-data>
-                {% csrf_token %}
-                <div class="form-group">
-                    <label for="brand_name">Brand Name</label>
-                    <input type="text" d class="form-control" name="brand_name" id="brand_name">
-               
-                    <label for="tags">Tags</label>
-                    <input type="text" data-role="tagsinput" class="form-control" name="tags" id="tags">
-                </div>
-                <button type="submit" class="btn btn-primary">Add Brand</button>
-            </form>
-            </div>
-            <div class="container pt-5 w-75">
-            <p class="p-2">Common Tags: 
-            {% for mct in common_tags %}
-                <a href="{% url 'brand_tags' mct.slug %}" class="badge">{{mct}}</a>
-            {% endfor %}
-            </p>
+        
+        <div class="container pt-5">
+            <h3><b>Tag</b>: {{tag|title}}</h3>
+            <p>Brands With Same Tag:</p>
             <div class="row mb-2 ">
                     {% for brand in brands %}
                     <div class="col-md-6">

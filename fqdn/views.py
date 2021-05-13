@@ -12,6 +12,7 @@ from django.template.defaultfilters import slugify
 from taggit.models import Tag
 from fqdn import models
 from trainer.forms import FQDNInstanceForm
+from fqdn.tasks import rematch_brands,rematch_keywords
 
 def tagged_kw(request, slug):
     tag = get_object_or_404(Tag, slug=slug)
@@ -22,7 +23,7 @@ def tagged_kw(request, slug):
         'common_tags':common_tags,
         'keywords':keywords,
     }
-    return render(request, 'fqdn/keyword_list.html', context)
+    return render(request, 'fqdn/keyword_tags.html', context)
 
 def tagged_brands(request, slug):
     tag = get_object_or_404(Tag, slug=slug)
@@ -33,7 +34,7 @@ def tagged_brands(request, slug):
         'common_tags':common_tags,
         'brands':brands,
     }
-    return render(request, 'fqdn/brand_list.html', context)
+    return render(request, 'fqdn/brand_tags.html', context)
 
 def brand_update (request,slug):
     return
@@ -54,6 +55,9 @@ def brand_detail(request, slug):
             brand.brand_name = brand.brand_name
             brand.tags.add(*form.cleaned_data['tags'])
             brand.save()
+        
+        return HttpResponseRedirect(reverse_lazy('view_all_brands'))
+
     context = {
         'brand':brand,
         'common_tags':common_tags,
@@ -61,7 +65,7 @@ def brand_detail(request, slug):
 
     }
         
-        
+    
     return render(request, 'fqdn/brand_detail.html', context)
    
 
@@ -84,12 +88,18 @@ def brand_list(request):
             new_brand.save()
             
             form.save_m2m()
+            rematch_brands.delay()
+
         else:
             return HttpResponse(form.errors)
   
     return render(request, 'fqdn/brand_list.html', context)
 
+def refresh_brands (request):
 
+    rematch_brands.delay()
+
+    return HttpResponseRedirect(reverse_lazy('view_all_brands')  )
 
 def keyword_list(request):
     keywords = KeyWord.objects.all()
@@ -100,6 +110,8 @@ def keyword_list(request):
         new_kw.slug = slugify(new_kw.keyword)
         new_kw.save()
         form.save_m2m()
+        rematch_keywords.delay()
+
     context = {
         'keywords':keywords,
         'common_tags':common_tags,
@@ -120,6 +132,7 @@ def kw_detail_view(request, slug):
             kw.keyword = kw.keyword
             kw.tags.add(*form.cleaned_data['tags'])
             kw.save()
+            return HttpResponseRedirect(reverse_lazy('view_all_keywords'))
     context = {
         'keyword':kw,
         'common_tags':common_tags,
@@ -167,7 +180,7 @@ class FQDNInstanceDetails (UpdateView):
     model =  FQDNInstance
     form_class = FQDNInstanceForm
     context_object_name = 'fqdn'
-    template_name = 'trainer/fqdninstance_detail.html'
+    template_name = 'fqdn/matched_fqdn_detail.html'
     
    # form_class  = FQDNInstanceForm
     def get_context_data (self,**kwargs):
@@ -185,4 +198,4 @@ class FQDNInstanceDetails (UpdateView):
         return  HttpResponseRedirect(self.get_success_url())
    
     def get_success_url(self):
-        return reverse_lazy('training_set')  
+        return reverse_lazy('home')  

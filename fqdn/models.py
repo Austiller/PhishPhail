@@ -1,3 +1,4 @@
+import fqdn
 from django.db import models
 # Create your models here.
 from taggit.managers import TaggableManager
@@ -107,18 +108,25 @@ class FQDNInstance(models.Model):
     
     def check_keyword(self,keywords):
         for obj in keywords:
-            if obj.keyword in self.fqdn_subdomain:
-                yield obj.id
-            elif obj.keyword in self.fqdn_domain:
-                yield obj.id
+            if obj.keyword.lower() in self.fqdn_subdomain.lower():
+                yield obj
+            elif obj.keyword.lower() in self.fqdn_domain.lower():
+                yield obj
             else:
                 continue
     
     def check_brand (self,brands):
         for obj in brands:
-            if obj.brand_name in self.fqdn_subdomain:
-                yield obj.id 
-            elif obj.brand_name in self.fqdn_domain:
-                yield obj.id
+      
+            if obj.brand_name.lower() in self.fqdn_subdomain.lower():
+               
+                yield obj
+                
+            elif obj.brand_name.lower() in self.fqdn_domain.lower():
+               
+                
+                yield obj
             else:
+              
+                
                 continue
