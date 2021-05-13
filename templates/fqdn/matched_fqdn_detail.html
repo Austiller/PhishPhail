@@ -1,0 +1,123 @@
+
+
+
+{% extends "base.html" %}
+
+{% load crispy_forms_tags %}
+
+
+
+{% block content %}
+
+  <div class="d-flex flex-column justify-content-center  p-3">
+  
+
+    <form method="post">
+      {% csrf_token %}
+    
+          <div class="container ">
+            <div class="row ">
+              <div class="col-4 p-2">
+                <b>FQDN</b>
+              </div>
+              <div class="col-1 p-2 ">
+                <b>Score</b>
+                  
+              </div>
+              <div class="col-2 p-2">
+                <b>FQDN Type</b>
+                
+              </div>
+              <div class="col-2 p-2">
+                <b>Domain</b>
+                
+              </div>
+              <div class="col-3 p-2">
+                <b>Sub-Domain</b>
+                
+              </div>
+
+            </div>
+
+            
+              <div class="row   justify-content-center align-items-center ">
+                <div class="col-4 ">
+                  {{ fqdn.fqdn_full }}
+                </div>
+                <div class="col-1 align-self-center ">
+                  {{ fqdn.score|floatformat:2 }}
+                </div>
+                <div class="col-2 align-self-center">
+                  {{ form.fqdn_type|as_crispy_field}}
+                </div>
+                <div class="col-2 align-self-center">
+                  {{ fqdn.fqdn_domain }}
+                </div>
+                <div class="col-3 align-self-center ">
+                  {{ fqdn.fqdn_subdomain }}
+                </div>
+
+              </div>
+        
+              
+        
+
+        <div class="container p-3">
+
+          <button type="submit" class="btn btn-primary">Update Type</button>
+            <a href="{% url 'home' %}" role="button" class="p-3">Cancel</a>
+        </div>
+  
+
+      </form>
+      <div>
+      <table  class="table table-hover">
+        <thead class="thead-dark">
+          <tr>
+            <th>Keyword</th>
+            <th>Tags</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for kw in fqdn.matched_keywords.all %}
+            <tr>
+            <td>{{  kw.keyword }}</a></td>
+            
+            <td>{% for mct in kw.tags.all %} <a href="{% url 'kw_tags' mct.slug %}" class="mr-1 badge badge-info">{{ mct }}</a> {% endfor %}</td>
+            </tr>
+            {% empty %}
+            <tr class="table-active">
+              <td colspan="3">None Found</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+      </table>
+
+      <table   class="table table-hover">
+        <thead class="thead-dark">
+          <tr>
+            <th>Brand</th>
+            <th>Tags</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for brand in fqdn.matched_brands.all %}
+            <tr>
+            <td>{{  brand.brand_name}}</a></td>
+            
+            <td>{% for mct in brand.tags.all %} <a href="{% url 'brand_tags' mct.slug %}" class="mr-1 badge badge-info">{{ mct }}</a> {% endfor %}</td>
+            </tr>
+            {% empty %}
+            <tr class="table-active">
+              <td colspan="3">None Found</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  <div>
+
+{% endblock %}
+
+
+

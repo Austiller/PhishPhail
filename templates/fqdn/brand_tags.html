@@ -1,0 +1,52 @@
+
+{% extends "base.html" %}
+
+
+
+{% block content %}
+{% load crispy_forms_tags %}
+  <div class="d-flex justify-content-center align-items-center m-3">
+    <div class="d-flex flex-column justify-content-center ">
+     
+      <div>
+        
+        <div class="container pt-5">
+            <h3><b>Tag</b>: {{tag|title}}</h3>
+            <p>Brands With Same Tag:</p>
+            <div class="row mb-2 ">
+                    {% for brand in brands %}
+                    <div class="col-md-6">
+
+                        <div class="col d-flex flex-column ">
+                            <h4 class="my-1"><a href="{% url 'view_brand_details' brand.slug %}">{{brand.brand_name|title}}</a></h4>
+                            <div style="display:flex">
+                                {% for tag in brand.tags.all %}
+                                <a href="{% url 'brand_tags' tag.slug %}" class="mr-1 badge badge-info">#{{ tag|title }}</a>
+                                {% endfor %}
+                            </div>
+                            
+                        </div>
+                           
+                            
+                    </div>
+                    {% endfor %}
+            </div>
+        </div>    
+
+
+
+
+
+
+
+
+
+
+    </div>  
+    
+    
+</div>
+
+
+{% endblock %}
+

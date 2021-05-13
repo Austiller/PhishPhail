@@ -4,32 +4,15 @@
 
 
 {% block content %}
-
-  <div class="d-flex justify-content-center align-items-center ">
+{% load crispy_forms_tags %}
+  <div class="d-flex justify-content-center align-items-center m-3">
     <div class="d-flex flex-column justify-content-center ">
      
       <div>
-
-        <div class="container pt-5 w-50">
-            <form method="POST">
-                {% csrf_token %}
-                <div class="form-group">
-                    <label>Keyword</label>
-                    <input type="text" class="form-control" name="keyword" placeholder="keyword">
-                    
-                    <label>Tags</label>
-                    <input type="text" data-role="tagsinput" class="form-control" name="tags">
-                </div>
-                <button type="submit" class="btn btn-primary">Add Keyword</button>
-            </form>
-        </div>
-        
-        <div class="container pt-5 w-75">
-            <p>Common Tags: 
-            {% for mt in common_tags %}
-                <a href="#" class="badge">{{mt|title}}</a>
-            {% endfor %}
-            </p>
+       
+        <div class="container pt-5">
+            <h3><b>Tag</b>: {{tag|title}}</h3>
+            <p>Keywords With The Same Tag:</p>
             <div class="row mb-2 ">
                     {% for keyword in keywords %}
                     <div class="col-md-6">

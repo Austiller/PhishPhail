@@ -7,43 +7,86 @@ from threading import Thread
 from fqdn.models import FQDNInstance,KeyWord,Brand
 from concurrent.futures import ThreadPoolExecutor,as_completed
 from django.db.utils import IntegrityError
+from django.db.models import prefetch_related_objects
+
+def update_tags (fqdn,matched_keywords=None,matched_brands=None):
+
+  
+    # rewrite this to better use the queryset api
+    if matched_keywords != None:
+        tags = []
+        for keyword in matched_keywords:
+            kw_tags = keyword.tags.all()
+            tags.extend([kt.name for kt in kw_tags])
+
+        fqdn.tags.add(*tags)
+        
+    if matched_brands != None:
+        tags = []
+        for brand in matched_brands:
+            brand_tags = brand.tags.all()
+            tags.extend([bt.name for bt in brand_tags])
+
+        fqdn.tags.add(*tags)
+   
+    fqdn.save()
+    return fqdn
 
 def check_for_matches (fqdn,keywords,brands):
     
+    matched_brands = None
+    matched_keywords = None
     
-    f_fqdn = FQDNInstance(fqdn_full=fqdn.fqdn_full,fqdn_tested=fqdn.fqdn_tested,score=fqdn.score,fqdn_type=fqdn.fqdn_type,
+    f_fqdn, created = FQDNInstance.objects.get_or_create(fqdn_full=fqdn.fqdn_full,fqdn_tested=fqdn.fqdn_tested,score=fqdn.score,fqdn_type=fqdn.fqdn_type,
                             model_match=fqdn.model_match,fqdn_subdomain=fqdn.fqdn_subdomain,fqdn_domain=fqdn.fqdn_domain)
             
-    try:
-        f_fqdn.save()
-        fqdn.delete()
-    except IntegrityError:
-        fqdn.delete()
-        return 1
-    matched_brands = [b for b in f_fqdn.check_brand(brands)]
-    matched_keywords = [b for b in f_fqdn.check_keyword(keywords)] 
-    if len(matched_keywords) > 1:
-        f_fqdn.matched_keywords.add(*matched_keywords)
+    
+    if keywords != None:
+        matched_keywords = [kw for kw in f_fqdn.check_keyword(keywords)] 
+        if len(matched_keywords) > 0:
+            f_fqdn.matched_keywords.add(*[kw.id for kw in matched_keywords])
 
-    if len(matched_brands) > 1:
-        f_fqdn.matched_brands.add(*matched_brands)
-
+    if brands != None:
+        print(f_fqdn.fqdn_full)
+        matched_brands = [b for b in f_fqdn.check_brand(brands)]
+        print(matched_brands)
+        if len(matched_brands) > 0:
+            f_fqdn.matched_brands.add(*[br.id for br in matched_brands])
+            
     f_fqdn.save()
-    fqdn.delete()
+    
+    update_tags(f_fqdn,matched_keywords,matched_brands)
+    if created:
+        fqdn.delete()
 
     return 1
+
+@app.task(name="rematch_brands")
+def rematch_brands (*args):
+    brands = Brand.objects.all()
+    fqdn_list = FQDNInstance.objects.all()
     
+    fqdn_list = [check_for_matches(fqdn=fqdn,keywords=None,brands=brands) for fqdn in fqdn_list] 
+
+@app.task(name="rematch_keywords")
+def rematch_keywords (*args):
+    keywords = KeyWord.objects.all()
+    fqdn_list = FQDNInstance.objects.all()
+    
+    fqdn_list = [check_for_matches(fqdn=fqdn,keywords=keywords,brands=None) for fqdn in fqdn_list] 
+
+
 @app.task(name="fetch_found_fqdn")
 def fetch_found_fqdn (*args):
     """
     
     """
-    fls = 10
+    
     
     fqdn_list = TfqdnInstance.objects.all()
     if len(fqdn_list) < 1:
         return 1
-    keywords = KeyWord.objects.all()
+    keywords = KeyWord.objects.all()#.prefetch_related("tags")
     brands = Brand.objects.all()
     
 

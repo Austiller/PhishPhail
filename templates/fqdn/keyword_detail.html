@@ -5,15 +5,15 @@
     <div class="d-flex flex-column justify-content-center ">
         {% load crispy_forms_tags %}
         
-          
-                    <label>Keyword</label>
-                    <td>{{ keyword}}</td>
+            
+                    <h4>Keyword</h4>
+                    <h4><b>{{ keyword|title}}</b></h4>
         <div>
             <form method="POST">
                 {% csrf_token %}
-      
+
                       <div class="form-group">
-                    <label for="tags">Tags</label>
+                    <label>Tags</label>
                     <input type="text" data-role="tagsinput" class="form-control" name="tags">
                 </div>
                 
@@ -35,7 +35,7 @@
 
                         <div style="display:flex">
                             {% for tag in keyword.tags.all %}
-                            <a href="{% url 'kw_tags' tag.slug %}" class="mr-1 badge badge-info">#{{ tag }}</a>
+                            <a href="{% url 'kw_tags' tag.slug %}" class="mr-1 badge badge-info">#{{ tag|title }}</a>
                             {% endfor %}
                         </div>
                         
