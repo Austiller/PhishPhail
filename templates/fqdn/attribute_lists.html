@@ -9,8 +9,11 @@
     <div class="d-flex flex-column justify-content-center ">
      
       <div>
-        <a href="{% url 'refresh_brands'  %}" class="badge">Update {{attribute}}</a>
+        <!--<a href="{% url 'refresh_brands'  %}" class="badge">Update {{attribute}}</a>!-->
+        
         <div class="container pt-5 w-50">
+            <h3><b><a href="{% url 'attribute_list' object_name %}">{{object_name|title}}s</a></b></h3>
+         
             <form method="POST">
                 {% csrf_token %}
                 <div class="form-group">
@@ -20,7 +23,7 @@
                     <label>Tags</label>
                     <input type="text" data-role="tagsinput" class="form-control" name="tags">
                 </div>
-                <button type="submit" class="btn btn-primary">Add {{object_name}}/button>
+                <button type="submit" class="btn btn-primary">Add {{object_name}}</button>
             </form>
         </div>
         

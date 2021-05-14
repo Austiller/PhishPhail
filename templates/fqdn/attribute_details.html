@@ -5,7 +5,7 @@
     <div class="d-flex flex-column justify-content-center ">
         {% load crispy_forms_tags %}
         
-                     <h3><b><a href="{% url 'attribute_list' object_name %}">{{object_name}}</a></b></h3>
+                     <h3><b><a href="{% url 'attribute_list' object_name %}">{{object_name|title}}s</a></b></h3>
                     <h4><b>{{ object.slug|title}}</b></h4>
         <div>
             <form method="POST">
