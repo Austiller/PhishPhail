@@ -31,14 +31,15 @@ class Trainer:
         trainingAttributes (dict): 
 
     """
-    def __init__(self,model_id,name,description):
+    def __init__(self,model_id:int):#,name:str,description:str,model_version:float=1.0):
         """
         Initializes the Trainer class, training the model, measuring the model and packaging the model. 
         
         """
         self.model_id = model_id
-        self.name = name
-        self.description = description
+        #self.version = model_version
+        #self.name = name
+        #self.description = description
         self.attributeManager = AttributeManager()
         self.fqdnList = [Fqdn(f.fqdn,f.fqdn_type) for f in FQDN.objects.all()]
         self.trainingAttributes = self.attributeManager.compute_attributes(self.fqdnList)
@@ -51,6 +52,7 @@ class Trainer:
 
         self.package_model()
     
+
     
     def __str__ (self):
         return self.modelDetails
@@ -59,6 +61,28 @@ class Trainer:
         return self.modelDetails
 
     #Convert to class method
+
+    @property
+    def model_binary (self):
+        return pickle.dumps(self.model)
+
+    @property
+    def attribute_manager (self):
+        return pickle.dumps(self.attributeManager)
+
+    @property
+    def export_for_model (self):
+        return   {
+            "model_algorithm":self.modelDetails['model_algorithm'],
+            "model_benign_count":  self.modelDetails['model_benign_count'],
+            "model_malicious_count": self.modelDetails['model_malicious_count'],
+            "accuracy_training_set": self.modelDetails['accuracy_training_set'],
+            "accuracy_test_set": self.modelDetails['accuracy_test_set'],
+            "accuracy_precision":    self.modelDetails['accuracy_precision'],
+            "accuracy_recall": self.modelDetails['accuracy_recall'],
+            "model_binary":  self.model_binary,
+            "model_attributes ":  self.attribute_manager }
+
 
     def train_model (self):
         """
@@ -85,7 +109,7 @@ class Trainer:
             attributeDf.values, self.fqdnArr, random_state=2)
 
         #train the model
-        self.model = LogisticRegression(C=10).fit(self._x_train, self._y_train)
+        self.model = LogisticRegression(C=10,max_iter=150,solver="sag").fit(self._x_train, self._y_train)
         
 
 
@@ -107,7 +131,7 @@ class Trainer:
 
         # Get model info
         
-        self.modelDetails['model_name'] = self.name
+    
         self.modelDetails['model_algorithm'] = str(self.model).split('(')[0]
 
 
@@ -135,35 +159,18 @@ class Trainer:
         return self.modelDetails
         
         
-        
 
 
     def package_model (self):
    
         
-
-        m = trainerModel(
-            id = self.model_id,
-            model_name=self.modelDetails['model_name'],
-            model_algorithm=self.modelDetails['model_algorithm'],
-            model_benign_count=  self.modelDetails['model_benign_count'],
-            model_malicious_count= self.modelDetails['model_malicious_count'],
-            accuracy_training_set= self.modelDetails['accuracy_training_set'],
-            accuracy_test_set= self.modelDetails['accuracy_test_set'],
-            accuracy_precision=    self.modelDetails['accuracy_precision'],
-            accuracy_recall= self.modelDetails['accuracy_recall'],
-            model_binary=  (pickle.dumps(self.model)),
-            model_attributes =  (pickle.dumps(self.attributeManager))
-    
-            )
-
-        try:
-            # save the model
-            m.save()
-        except Exception as e:
-            raise e
+        m = trainerModel.objects.get(pk=self.model_id)
         
-       
+        for k,v in self.export_for_model.items():
+            setattr(m,k,v)
+        m.save()
+
+
     
    
 
@@ -185,7 +192,7 @@ class AttributeManager:
      
         
     def compute_attributes (self,fqdnList,speed=False):
-
+        
  
         result = {}
         attributes = []

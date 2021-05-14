@@ -1,11 +1,11 @@
 from typing import List
 from django.forms.widgets import MultipleHiddenInput
 from django.shortcuts import render
-from .models import KeyWord,Brand,FQDNInstance
+from fqdn.models import KeyWord,Brand,FQDNInstance
 from django.shortcuts import render, HttpResponse, get_object_or_404, HttpResponseRedirect
 from django.urls import reverse_lazy, reverse
 from django.views.generic import ListView, CreateView, UpdateView,DetailView
-from fqdn.forms import BrandForm, KeyWordForm, KeywordUpdate
+from fqdn.forms import BrandForm, KeyWordForm, KeywordUpdate,SquatedWordForm
 from fqdn.models import FQDNInstance,KeyWord,Brand,SquatedWord
 # Create your views here.
 from django.template.defaultfilters import slugify
@@ -13,138 +13,169 @@ from taggit.models import Tag
 from fqdn import models
 from trainer.forms import FQDNInstanceForm
 from fqdn.tasks import rematch_brands,rematch_keywords
-
-def tagged_kw(request, slug):
-    tag = get_object_or_404(Tag, slug=slug)
-    common_tags = KeyWord.tags.most_common()[:4]
-    keywords = KeyWord.objects.filter(tags=tag)
-    context = {
-        'tag':tag,
-        'common_tags':common_tags,
-        'keywords':keywords,
-    }
-    return render(request, 'fqdn/keyword_tags.html', context)
-
-def tagged_brands(request, slug):
-    tag = get_object_or_404(Tag, slug=slug)
-    common_tags = Brand.tags.most_common()[:4]
-    brands = Brand.objects.filter(tags=tag)
-    context = {
-        'tag':tag,
-        'common_tags':common_tags,
-        'brands':brands,
-    }
-    return render(request, 'fqdn/brand_tags.html', context)
-
-def brand_update (request,slug):
-    return
+import csv,json
+from django.http import JsonResponse
 
 
- 
+def csv_all (request):
 
 
-def brand_detail(request, slug):
-    brand = get_object_or_404(Brand, slug=slug)
-    common_tags = brand.tags.most_common()[:4]
-    
-    form = KeywordUpdate(request.POST)
-
-    if request.method == "POST":
-        
-        if form.is_valid():
-            brand.brand_name = brand.brand_name
-            brand.tags.add(*form.cleaned_data['tags'])
-            brand.save()
-        
-        return HttpResponseRedirect(reverse_lazy('view_all_brands'))
-
-    context = {
-        'brand':brand,
-        'common_tags':common_tags,
-        'form':form,
-
-    }
-        
-    
-    return render(request, 'fqdn/brand_detail.html', context)
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = 'attachment; filename="fqdnreport.csv"'
+    writer = csv.writer(response)
    
-
-
-def brand_list(request):
-    brands = Brand.objects.all()
-    common_tags = Brand.tags.most_common()[:4]
-  
-    form = BrandForm(request.POST)
-    context = {
-        'brands':brands,
-        'common_tags':common_tags,
-        'form':form,
-    }
+    data = FQDNInstance.objects.all()
     
+    cols = [f.name for f in FQDNInstance._meta.fields]
+    writer.writerow(cols)    
+    for row in data:
+        rowobj = []
+        for c in cols:
+            rowobj.append(getattr(row,c))
+
+        writer.writerow(rowobj)
+
+    return response
+
+def json_all (request):
+
+    response = HttpResponse(content_type='text/json')
+    response['Content-Disposition'] = 'attachment; filename="fqdnreport.json"'
+    
+   
+    j_list = [] 
+    
+    for f in FQDNInstance.objects.all():
+       
+        j_list.append(f.for_training())
+     
+    
+    return JsonResponse(data=j_list,safe=False)
+
+def csv_malicious (request):
+
+    
+
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = 'attachment; filename="fqdnreport.csv"'
+    writer = csv.writer(response)
+   
+    data = FQDNInstance.objects.filter(score__gte=0.75)
+    
+    cols = [f.name for f in FQDNInstance._meta.fields]
+    writer.writerow(cols)    
+    for row in data:
+        rowobj = []
+        for c in cols:
+            rowobj.append(getattr(row,c))
+
+        writer.writerow(rowobj)
+
+    return response
+
+
+def set_attribute_object(attribute_name):
+    if attribute_name == "Brand":
+        return Brand,BrandForm
+    elif attribute_name == "SquatedWord":
+        return SquatedWord, SquatedWordForm
+    elif attribute_name == "KeyWord":
+        return KeyWord, KeyWordForm
+
+
+
+def attribute_tags(request,attribute_name, slug):
+    tag = get_object_or_404(Tag, slug=slug)
+    obj, form = set_attribute_object(attribute_name)
+    common_tags = obj.tags.most_common()[:4]
+    objs = obj.objects.filter(tags=tag)
+    context = {
+        'tag':tag,
+        'common_tags':common_tags,
+        'objects':objs,
+        'object_name':attribute_name,
+        'required_fields':objs[0].required_fields
+    }
+    return render(request, 'fqdn/attribute_tags.html', context)
+
+
+def attribute_detail(request,attribute_name,slug):
+    obj, form = set_attribute_object(attribute_name)
+    objs = get_object_or_404(obj, slug=slug)
+    
+    common_tags = objs.tags.most_common()[:4]
+
     if request.method == "POST":
+        form = form(request.POST)
         if form.is_valid():   
-            new_brand = form.save(commit=False)
-            new_brand.slug = slugify(new_brand.brand_name)
-            new_brand.save()
+            new_obj = form.save(commit=False)
+            new_obj.slug = slugify(new_obj.get_slug_name)
+            new_obj.save()
             
             form.save_m2m()
-            rematch_brands.delay()
+           #
 
         else:
+            input(form.errors)
             return HttpResponse(form.errors)
-  
-    return render(request, 'fqdn/brand_list.html', context)
+ 
+
+      
+    context = {
+        'object':objs,
+        'common_tags':common_tags,
+        'form':form,
+        'object_name': attribute_name,
+        'required_fields':objs.required_fields
+    }
+    
+    
+    return render(request, 'fqdn/attribute_details.html', context)
+    
+def attribute_list (request,attribute_name):
+    print(attribute_name)
+    obj, form = set_attribute_object(attribute_name)
+
+    objs = obj.objects.all()
+    # "{% url 'sw_tags' tag.slug %}"
+    #"{% url 'view_kw_details' object.slug %}"
+    common_tags = obj.tags.most_common()[:4]
+    
+    
+   
+    context = {
+        'objects':objs,
+        'common_tags':common_tags,
+        'form':form,
+        'object_name': attribute_name,
+        'required_fields':objs[0].required_fields
+    }
+    
+    if request.method == "POST":
+        form = form(request.POST)
+        if form.is_valid():   
+            new_obj = form.save(commit=False)
+            new_obj.slug = slugify(new_obj.get_slug_name)
+            new_obj.save()
+            
+            form.save_m2m()
+            if attribute_name == "Brand":
+                rematch_brands.delay()
+            elif attribute_name == "SquatedWord":
+                rematch_keywords.delay()
+
+        else:
+            input(form.errors)
+            return HttpResponse(form.errors)
+ 
+    return render(request, 'fqdn/attribute_lists.html', context)
+
 
 def refresh_brands (request):
 
     rematch_brands.delay()
 
     return HttpResponseRedirect(reverse_lazy('view_all_brands')  )
-
-def keyword_list(request):
-    keywords = KeyWord.objects.all()
-    common_tags = KeyWord.tags.most_common()[:4]
-    form = KeyWordForm(request.POST)
-    if form.is_valid():
-        new_kw = form.save(commit=False)
-        new_kw.slug = slugify(new_kw.keyword)
-        new_kw.save()
-        form.save_m2m()
-        rematch_keywords.delay()
-
-    context = {
-        'keywords':keywords,
-        'common_tags':common_tags,
-        'form':form,
-    }
-    return render(request, 'fqdn/keyword_list.html', context)
-
-
-def kw_detail_view(request, slug):
-    kw = get_object_or_404(KeyWord, slug=slug)
-    common_tags = kw.tags.most_common()[:4]
-    
-    form = KeywordUpdate(request.POST)
-
-    if request.method == "POST":
-        
-        if form.is_valid():
-            kw.keyword = kw.keyword
-            kw.tags.add(*form.cleaned_data['tags'])
-            kw.save()
-            return HttpResponseRedirect(reverse_lazy('view_all_keywords'))
-    context = {
-        'keyword':kw,
-        'common_tags':common_tags,
-        'form':form,
-
-    }
-        
-        
-    return render(request, 'fqdn/keyword_detail.html', context)
-   
-
-
 
 class FQDNInstanceListView(ListView):
     model = FQDNInstance

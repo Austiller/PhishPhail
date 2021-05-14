@@ -34,7 +34,7 @@ class ModelCreateView (CreateView):
         model.save()
 
         # Need to develop a thing that if the model fails to be created it removes the entry
-        tasks.train_model.delay(model_name=model_name,model_id=model_id,model_description=model_description)
+        tasks.train_model.delay(model_id=model.id)
         return HttpResponseRedirect(self.get_success_url())
      
     def get_success_url(self):

@@ -21,7 +21,7 @@ class ModelForm(forms.ModelForm):
 
     class Meta:
         model = Model
-        fields = ('model_name', 'model_description','set_as_default')
+        fields = ('model_name','model_version', 'model_description','set_as_default')
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

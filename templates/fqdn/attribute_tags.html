@@ -1,0 +1,44 @@
+
+{% extends "base.html" %}
+
+
+
+{% block content %}
+{% load crispy_forms_tags %}
+  <div class="d-flex  align-items-center p-4 justify-content-center">
+    <div class="d-flex flex-column align-items-center w-50  ">
+     
+
+       
+       
+            
+            <h4><b><a href="{% url 'attribute_list' object_name %}">{{object_name|upper}} Tag: </a></b></h4>
+            <h4>{{tag|title}}</h4>
+            <div><br></div>
+            <p>Keywords With The Same Tag:</p>
+            <div class="row mb-2 p-1 ">
+                    {% for object in objects %}
+                    <div class="col-md-6 p-1">
+
+                        <div class="col d-flex flex-column align-items-center">
+                            <h4 class="pt-1"><a href="{% url 'attribute_details' object_name object.slug %}">{{object.slug|title}}</a></h4>
+                            <div style="display:flex">
+                                {% for tag in object.tags.all %}
+                                <a href="{% url 'attribute_tags' object_name tag.slug %}" class="mr-1 badge badge-info">#{{ tag|title }}</a>
+                                {% endfor %}
+                            </div>
+                            
+                        </div>
+                           
+                            
+                    </div>
+                    {% endfor %}
+            </div>
+       
+
+
+</div>
+</div>  
+
+{% endblock %}
+

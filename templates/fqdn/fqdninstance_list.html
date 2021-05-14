@@ -9,12 +9,13 @@
     <div class="d-flex flex-column justify-content-center ">
       <div  class="d-flex align-self-left p-3">
        <ul class="nav ">
+        <a href="{% url 'attribute_list' 'Brand'   %}" class="badge">test</a>
         <li class="nav-item dropdown ">
             <a class="nav-link dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">CSV Reports</a>
             <div class="dropdown-menu" >
              <a class="dropdown-item" href="{% url 'download_all' %}">Download All</a>
               <a class="dropdown-item" href="{% url 'download_malicious' %}">Malicious Only</a>
-              
+              <a class="dropdown-item" href="{% url 'json_all' %}">For Training</a>
             </div>
 
           </li>

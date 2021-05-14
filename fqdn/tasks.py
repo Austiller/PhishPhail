@@ -34,8 +34,8 @@ def update_tags (fqdn,matched_keywords=None,matched_brands=None):
 
 def check_for_matches (fqdn,keywords,brands):
     
-    matched_brands = None
-    matched_keywords = None
+    matched_brands = []
+    matched_keywords = []
     
     f_fqdn, created = FQDNInstance.objects.get_or_create(fqdn_full=fqdn.fqdn_full,fqdn_tested=fqdn.fqdn_tested,score=fqdn.score,fqdn_type=fqdn.fqdn_type,
                             model_match=fqdn.model_match,fqdn_subdomain=fqdn.fqdn_subdomain,fqdn_domain=fqdn.fqdn_domain)
@@ -47,15 +47,15 @@ def check_for_matches (fqdn,keywords,brands):
             f_fqdn.matched_keywords.add(*[kw.id for kw in matched_keywords])
 
     if brands != None:
-        print(f_fqdn.fqdn_full)
+        
         matched_brands = [b for b in f_fqdn.check_brand(brands)]
-        print(matched_brands)
         if len(matched_brands) > 0:
             f_fqdn.matched_brands.add(*[br.id for br in matched_brands])
-            
-    f_fqdn.save()
     
-    update_tags(f_fqdn,matched_keywords,matched_brands)
+    if len(matched_brands) > 0 or len(matched_keywords) > 0:
+        f_fqdn.save()
+        update_tags(f_fqdn,matched_keywords,matched_brands)
+        
     if created:
         fqdn.delete()
 

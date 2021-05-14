@@ -93,6 +93,7 @@ class FQDNInstance(models.Model):
 class Model (models.Model):
     # Name of the Model
     model_name = models.CharField(default=False,max_length=128,null=False)
+    model_version = models.FloatField(default=1.0,null=True)
     model_description = models.TextField(default="",max_length=256,null=True)
     model_algorithm =  models.CharField(default=False,max_length=128,null=True)
     model_creation_date = models.DateTimeField(null=True)

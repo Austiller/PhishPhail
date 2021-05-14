@@ -1,15 +1,15 @@
+from sys import version
 from phishFail.celery import app
 from trainer.trainer import AttributeManager,Trainer
 
 from celery import shared_task
 
-#@app.task
+
 @shared_task
-def train_model(model_name,model_id,model_description):
+def train_model(model_id:int):#model_name:str,model_id:int,model_description:str,model_version:float):
     # Get all FQDNs for training
   
-    t = Trainer(name=model_name,model_id=model_id,description=model_description)
+    t = Trainer(model_id)
     
-    t.train_model()
 
     return 1
