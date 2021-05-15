@@ -66,9 +66,7 @@ class Trainer:
     def model_binary (self):
         return pickle.dumps(self.model)
 
-    @property
-    def attribute_manager (self):
-        return pickle.dumps(self.attributeManager)
+
 
     @property
     def export_for_model (self):
@@ -81,7 +79,7 @@ class Trainer:
             "accuracy_precision":    self.modelDetails['accuracy_precision'],
             "accuracy_recall": self.modelDetails['accuracy_recall'],
             "model_binary":  self.model_binary,
-            "model_attributes ":  self.attribute_manager }
+            "model_attributes ":  pickle.dumps(self.attributeManager) }
 
 
     def train_model (self):
@@ -162,12 +160,13 @@ class Trainer:
 
 
     def package_model (self):
-   
         
         m = trainerModel.objects.get(pk=self.model_id)
-        
+
         for k,v in self.export_for_model.items():
             setattr(m,k,v)
+        m.model_attributes = pickle.dumps(self.attributeManager)
+        
         m.save()
 
 
