@@ -30,11 +30,12 @@ class ModelCreateView (CreateView):
     template_name = 'trainer/model_form.html'
         
     def form_valid(self, form):
-        model = form.save(commit=False)
-        model.save()
+        model = form.save(commit=True)
+        
 
         # Need to develop a thing that if the model fails to be created it removes the entry
         tasks.train_model.delay(model_id=model.id)
+      
         return HttpResponseRedirect(self.get_success_url())
      
     def get_success_url(self):
