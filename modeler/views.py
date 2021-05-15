@@ -1,3 +1,4 @@
+from sys import version
 from django.shortcuts import render, HttpResponse, reverse,HttpResponseRedirect
 from django.http import JsonResponse
 from django.urls import reverse_lazy
@@ -10,16 +11,15 @@ from trainer.models import FQDNInstance
 import csv
 from modeler.tasks import start_model
 import pickle
+from trainer.tasks import train_model
+from trainer.models import Model as tModel
 
 def csv_all (request):
 
-    
 
     response = HttpResponse(content_type='text/csv')
     response['Content-Disposition'] = 'attachment; filename="fqdnreport.csv"'
     writer = csv.writer(response)
-
-
    
     data = FQDNInstance.objects.all()
     
@@ -74,14 +74,21 @@ class ModelEdit (UpdateView):
     model = Model
     form_class = ModelEdit
     template_name =  'models/model_details.html'
-
+    
     #If the form is valid, pass the primary key referencing the model to be executed.    
     def form_valid(self, form):
-        model = form.save(commit=True)
-        request = self.request
+        new_version = form.cleaned_data['model_version']
+        old_version = Model.objects.get(pk=self.object.id).model_version
+       
+        model = form.save(commit=False)
+        
+        if new_version != old_version:
+            train_model.delay(model_id=model.id)
+        
+        model.save()
 
         return HttpResponseRedirect(reverse('models'))
-
+        
 
     def get_success_url(self):
         return reverse_lazy('models')

@@ -83,7 +83,7 @@
             <tr>
             <td>{{  kw.keyword }}</a></td>
             
-            <td>{% for mct in kw.tags.all %} <a href="{% url 'kw_tags' mct.slug %}" class="mr-1 badge badge-info">{{ mct }}</a> {% endfor %}</td>
+            <td>{% for mct in kw.tags.all %} <a href="{% url 'attribute_tags' 'KeyWord' mct.slug %}" class="mr-1 badge badge-info">{{ mct }}</a> {% endfor %}</td>
             </tr>
             {% empty %}
             <tr class="table-active">
@@ -105,7 +105,7 @@
             <tr>
             <td>{{  brand.brand_name}}</a></td>
             
-            <td>{% for mct in brand.tags.all %} <a href="{% url 'brand_tags' mct.slug %}" class="mr-1 badge badge-info">{{ mct }}</a> {% endfor %}</td>
+            <td>{% for mct in brand.tags.all %} <a href="{% url 'attribute_tags' 'Brand'  mct.slug %}" class="mr-1 badge badge-info">{{ mct }}</a> {% endfor %}</td>
             </tr>
             {% empty %}
             <tr class="table-active">

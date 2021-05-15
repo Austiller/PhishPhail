@@ -35,9 +35,9 @@
             <a class="nav-link dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false"> FQDN
             </a>
             <div class="dropdown-menu" >
-              <a class="dropdown-item" href="{% url 'view_all_keywords' %}">View Keywords</a>
-              <a class="dropdown-item" href="{% url 'view_all_brands' %}">View Brands</a>
-       
+              <a class="dropdown-item" href="{% url 'attribute_list' 'KeyWord'  %}">View Keywords</a>
+              <a class="dropdown-item" href="{% url 'attribute_list' 'Brand' %}">View Brands</a>
+              <a class="dropdown-item" href="{% url 'attribute_list' 'SquatedWord' %}">View Squated Words</a>
             </div>
 
             <li class="nav-item ">

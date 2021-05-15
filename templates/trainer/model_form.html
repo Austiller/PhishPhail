@@ -11,6 +11,7 @@
     
       <div class="d-flex flex-column justify-content-center ">
         {{ form.model_name|as_crispy_field}}
+        {{ form.model_version|as_crispy_field}}
         {{ form.model_description|as_crispy_field}}
         {{ form.set_as_default|as_crispy_field }}
         

@@ -27,8 +27,8 @@ class ModelEdit(forms.ModelForm):
     
     class Meta:
         model = Model
- 
-        fields = ('model_name','model_description','model_algorithm','set_as_default', 'accuracy_training_set', 'accuracy_precision','accuracy_recall')
+    
+        fields = ('model_name','model_version','model_description','model_algorithm','set_as_default', 'accuracy_training_set', 'accuracy_precision','accuracy_recall')
 
 
 

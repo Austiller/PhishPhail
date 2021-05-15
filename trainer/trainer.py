@@ -31,14 +31,15 @@ class Trainer:
         trainingAttributes (dict): 
 
     """
-    def __init__(self,model_id,name,description):
+    def __init__(self,model_id:int):#,name:str,description:str,model_version:float=1.0):
         """
         Initializes the Trainer class, training the model, measuring the model and packaging the model. 
         
         """
         self.model_id = model_id
-        self.name = name
-        self.description = description
+        #self.version = model_version
+        #self.name = name
+        #self.description = description
         self.attributeManager = AttributeManager()
         self.fqdnList = [Fqdn(f.fqdn,f.fqdn_type) for f in FQDN.objects.all()]
         self.trainingAttributes = self.attributeManager.compute_attributes(self.fqdnList)
@@ -51,6 +52,7 @@ class Trainer:
 
         self.package_model()
     
+
     
     def __str__ (self):
         return self.modelDetails
@@ -59,6 +61,26 @@ class Trainer:
         return self.modelDetails
 
     #Convert to class method
+
+    @property
+    def model_binary (self):
+        return pickle.dumps(self.model)
+
+
+
+    @property
+    def export_for_model (self):
+        return   {
+            "model_algorithm":self.modelDetails['model_algorithm'],
+            "model_benign_count":  self.modelDetails['model_benign_count'],
+            "model_malicious_count": self.modelDetails['model_malicious_count'],
+            "accuracy_training_set": self.modelDetails['accuracy_training_set'],
+            "accuracy_test_set": self.modelDetails['accuracy_test_set'],
+            "accuracy_precision":    self.modelDetails['accuracy_precision'],
+            "accuracy_recall": self.modelDetails['accuracy_recall'],
+            "model_binary":  self.model_binary,
+            "model_attributes ":  pickle.dumps(self.attributeManager) }
+
 
     def train_model (self):
         """
@@ -85,7 +107,7 @@ class Trainer:
             attributeDf.values, self.fqdnArr, random_state=2)
 
         #train the model
-        self.model = LogisticRegression(C=10).fit(self._x_train, self._y_train)
+        self.model = LogisticRegression(C=10,max_iter=150,solver="sag").fit(self._x_train, self._y_train)
         
 
 
@@ -107,7 +129,7 @@ class Trainer:
 
         # Get model info
         
-        self.modelDetails['model_name'] = self.name
+    
         self.modelDetails['model_algorithm'] = str(self.model).split('(')[0]
 
 
@@ -135,35 +157,19 @@ class Trainer:
         return self.modelDetails
         
         
-        
 
 
     def package_model (self):
-   
         
+        m = trainerModel.objects.get(pk=self.model_id)
 
-        m = trainerModel(
-            id = self.model_id,
-            model_name=self.modelDetails['model_name'],
-            model_algorithm=self.modelDetails['model_algorithm'],
-            model_benign_count=  self.modelDetails['model_benign_count'],
-            model_malicious_count= self.modelDetails['model_malicious_count'],
-            accuracy_training_set= self.modelDetails['accuracy_training_set'],
-            accuracy_test_set= self.modelDetails['accuracy_test_set'],
-            accuracy_precision=    self.modelDetails['accuracy_precision'],
-            accuracy_recall= self.modelDetails['accuracy_recall'],
-            model_binary=  (pickle.dumps(self.model)),
-            model_attributes =  (pickle.dumps(self.attributeManager))
-    
-            )
-
-        try:
-            # save the model
-            m.save()
-        except Exception as e:
-            raise e
+        for k,v in self.export_for_model.items():
+            setattr(m,k,v)
+        m.model_attributes = pickle.dumps(self.attributeManager)
         
-       
+        m.save()
+
+
     
    
 
@@ -181,11 +187,11 @@ class AttributeManager:
         self.trainer_topleveldomain = [t.tld  for t in TopLevelDomain.objects.all()]
         self.trainer_keyword = {kw.id:kw.keyword for kw in KeyWord.objects.all()}
         self.trainer_squatedword = [sw.squated_word for sw in SquatedWord.objects.all()]
-      
+      # safe domains
      
         
     def compute_attributes (self,fqdnList,speed=False):
-
+        
  
         result = {}
         attributes = []
@@ -243,6 +249,7 @@ class AttributeManager:
                 if (brand in fqdn.words):
                     results["{}_brand_dn".format(brand)] = 1
                     fqdn.brand_match[brand] = brand_id
+
                 if(brand == fqdn.subdomain):
                     results["{}_brand_sn".format(brand)] = 1
                     fqdn.brand_match[brand] = brand_id
@@ -257,7 +264,7 @@ class AttributeManager:
         
         """
 
-        Check to see if the fqdn starts with a number
+        Check to see if the fqdn contains  a number
 
         Args:
             fqdn (Fqdn): Fqdn Object
@@ -345,7 +352,19 @@ class AttributeManager:
         #Maybe Improve by calculating the entropy of the fully FQDN and domain, possibly the fqdn-words as well. 
 
         fqdn.entropy = -sum(count / lngth * math.log(count / lngth, 2) for count in list(p.values()))
+
+        p, lngth = Counter(fqdn.subdomain), float(len(fqdn.subdomain))
+
+
+        subd_entropy = -sum(count / lngth * math.log(count / lngth, 2) for count in list(p.values()))
+
+        if subd_entropy > fqdn.entropy and subd_entropy > 3.99:
+            fqdn.entropy = 1
+        
+
+
         result['entropy'] = fqdn.entropy
+
         return result
        
     def att_count_dashes(self,fqdn):
@@ -408,7 +427,7 @@ class AttributeManager:
             Measures the  the similarity between words commonly associated with phishing and those found in the 
             FQDN. Looks for a max distance of 1
 
-            a distance of 1 would for the word 'WellsFargo' would look like 'W3llsFargo', 'We1lsFargo'
+            a distance of 1 would for the word 'WellsFargo' would look like 'W3llsFargo'
 
         
 
@@ -455,17 +474,13 @@ class AttributeManager:
 
         for brand_id,brand in self.trainer_brand.items():
             result[brand + "_brand_lvl_1"] = 0
-            result[brand + "_brand_lvl_2"] = 0
-
+           
             for word in fqdn.words:
                 dist = distance(word,brand)
-                if dist == 1 and len(word) > 5:
-                    result[brand + "_brand_lvl_1"] = 2
+                if dist == 1 and len(word) >= 5:
+                    result[brand + "_brand_lvl_1"] = 1
                     fqdn.brand_match[brand] = brand_id 
 
-                elif (dist == 2 and len(brand) > 5):
-                    result[brand + "_brand_lvl_2"] = 2
-                    fqdn.brand_match[brand] = brand_id
-
+              
 
         return result

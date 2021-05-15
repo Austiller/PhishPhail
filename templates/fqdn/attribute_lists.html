@@ -9,36 +9,39 @@
     <div class="d-flex flex-column justify-content-center ">
      
       <div>
-
+        <!--<a href="{% url 'refresh_brands'  %}" class="badge">Update {{attribute}}</a>!-->
+        
         <div class="container pt-5 w-50">
+            <h3><b><a href="{% url 'attribute_list' object_name %}">{{object_name|title}}s</a></b></h3>
+         
             <form method="POST">
                 {% csrf_token %}
                 <div class="form-group">
-                    <label>Keyword</label>
-                    <input type="text" class="form-control" name="keyword" placeholder="keyword">
+                    <label>{{object_name}}</label>
+                    <input type="text" class="form-control" name={{required_fields.name}} placeholder={{required_fields.name}}>
                     
                     <label>Tags</label>
                     <input type="text" data-role="tagsinput" class="form-control" name="tags">
                 </div>
-                <button type="submit" class="btn btn-primary">Add Keyword</button>
+                <button type="submit" class="btn btn-primary">Add {{object_name}}</button>
             </form>
         </div>
         
         <div class="container pt-5 w-75">
             <p>Common Tags: 
             {% for mt in common_tags %}
-                <a href="{% url 'kw_tags' mt.slug %}" class="badge">{{mt|title}}</a>
+                <a href="{% url 'attribute_tags' object_name  mt.slug %}" class="badge">{{mt|title}}</a>
             {% endfor %}
             </p>
             <div class="row mb-2 ">
-                    {% for keyword in keywords %}
+                    {% for object in objects %}
                     <div class="col-md-6">
 
                         <div class="col d-flex flex-column ">
-                            <h4 class="my-1"><a href="{% url 'view_kw_details' keyword.slug %}">{{keyword.keyword|title}}</a></h4>
+                            <h4 class="my-1"><a href="{% url 'attribute_details' object_name object.slug %}">{{object.slug|title}}</a></h4>
                             <div style="display:flex">
-                                {% for tag in keyword.tags.all %}
-                                <a href="{% url 'kw_tags' tag.slug %}" class="mr-1 badge badge-info">#{{ tag|title }}</a>
+                                {% for tag in object.tags.all %}
+                                <a href="{% url 'attribute_tags' object_name tag.slug %}" class="mr-1 badge badge-info">#{{ tag|title }}</a>
                                 {% endfor %}
                             </div>
                             

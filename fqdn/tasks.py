@@ -4,8 +4,7 @@ from celery.schedules import crontab
 from phishFail.celery import app
 from trainer.models import FQDNInstance as TfqdnInstance
 from threading import Thread
-from fqdn.models import FQDNInstance,KeyWord,Brand
-from concurrent.futures import ThreadPoolExecutor,as_completed
+from fqdn.models import FQDN,KeyWord,Brand
 from django.db.utils import IntegrityError
 from django.db.models import prefetch_related_objects
 
@@ -28,18 +27,22 @@ def update_tags (fqdn,matched_keywords=None,matched_brands=None):
             tags.extend([bt.name for bt in brand_tags])
 
         fqdn.tags.add(*tags)
-   
-    fqdn.save()
+    try:
+        
+        fqdn.save()
+    except IntegrityError:
+        pass
+    
     return fqdn
 
 def check_for_matches (fqdn,keywords,brands):
     
-    matched_brands = None
-    matched_keywords = None
+    matched_brands = []
+    matched_keywords = []
     
-    f_fqdn, created = FQDNInstance.objects.get_or_create(fqdn_full=fqdn.fqdn_full,fqdn_tested=fqdn.fqdn_tested,score=fqdn.score,fqdn_type=fqdn.fqdn_type,
+    f_fqdn, created = FQDN.objects.get_or_create(fqdn_full=fqdn.fqdn_full,fqdn_tested=fqdn.fqdn_tested,score=fqdn.score,fqdn_type=fqdn.fqdn_type,
                             model_match=fqdn.model_match,fqdn_subdomain=fqdn.fqdn_subdomain,fqdn_domain=fqdn.fqdn_domain)
-            
+    
     
     if keywords != None:
         matched_keywords = [kw for kw in f_fqdn.check_keyword(keywords)] 
@@ -47,15 +50,15 @@ def check_for_matches (fqdn,keywords,brands):
             f_fqdn.matched_keywords.add(*[kw.id for kw in matched_keywords])
 
     if brands != None:
-        print(f_fqdn.fqdn_full)
+        
         matched_brands = [b for b in f_fqdn.check_brand(brands)]
-        print(matched_brands)
         if len(matched_brands) > 0:
             f_fqdn.matched_brands.add(*[br.id for br in matched_brands])
-            
-    f_fqdn.save()
     
-    update_tags(f_fqdn,matched_keywords,matched_brands)
+    if len(matched_brands) > 0 or len(matched_keywords) > 0:
+        f_fqdn.save()
+        update_tags(f_fqdn,matched_keywords,matched_brands)
+    
     if created:
         fqdn.delete()
 
@@ -64,14 +67,14 @@ def check_for_matches (fqdn,keywords,brands):
 @app.task(name="rematch_brands")
 def rematch_brands (*args):
     brands = Brand.objects.all()
-    fqdn_list = FQDNInstance.objects.all()
+    fqdn_list = FQDN.objects.all()
     
     fqdn_list = [check_for_matches(fqdn=fqdn,keywords=None,brands=brands) for fqdn in fqdn_list] 
 
 @app.task(name="rematch_keywords")
 def rematch_keywords (*args):
     keywords = KeyWord.objects.all()
-    fqdn_list = FQDNInstance.objects.all()
+    fqdn_list = FQDN.objects.all()
     
     fqdn_list = [check_for_matches(fqdn=fqdn,keywords=keywords,brands=None) for fqdn in fqdn_list] 
 
