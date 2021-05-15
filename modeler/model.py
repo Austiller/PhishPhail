@@ -52,13 +52,13 @@ class Fqdn:
         
         """
     
-        common_prefixes = ["*", "www", "mail", "cpanel", "webmail",
+        common_prefixes = ["*", "www", 'www1','www2',"mail", "cpanel", "webmail",
                         "webdisk", "autodiscover"]
         
         split_fqdn = fqdn.split(".",1)
-        if len(split_fqdn ) > 1:
-            if(split_fqdn[0] in common_prefixes):
-                return split_fqdn[1]
+       
+        if(split_fqdn[0] in common_prefixes):
+            return split_fqdn[1]
 
         return fqdn
 
