@@ -115,7 +115,7 @@ class FQDN(models.Model):
     fqdn_subdomain = models.CharField(null=True,max_length=200)
     fqdn_domain = models.CharField(null=True,max_length = 200)
 
-
+    #for_training = models.BooleanField(default=False,null=True)
     # The date which the FQDN was seen
     date_seen = models.DateTimeField(auto_now_add=True)
     
@@ -156,14 +156,6 @@ class FQDN(models.Model):
                 
                 continue
 
-    def for_training (self):
-
-        as_dict = {"model": "trainer.fqdn", "pk": self.id,"fields":{"fqdn":self.fqdn_full,
-            "fqdn_type":self.fqdn_type,
-            "for_training":True,
-            }
-        }
-        return as_dict
 
     def number_dashes(self):
         return 0 if "xn--" in self.fqdn else self.count("-")

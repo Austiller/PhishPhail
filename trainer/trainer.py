@@ -352,6 +352,17 @@ class AttributeManager:
         #Maybe Improve by calculating the entropy of the fully FQDN and domain, possibly the fqdn-words as well. 
 
         fqdn.entropy = -sum(count / lngth * math.log(count / lngth, 2) for count in list(p.values()))
+
+        p, lngth = Counter(fqdn.subdomain), float(len(fqdn.subdomain))
+
+
+        subd_entropy = -sum(count / lngth * math.log(count / lngth, 2) for count in list(p.values()))
+
+        if subd_entropy > fqdn.entropy and subd_entropy > 3.99:
+            fqdn.entropy = 1
+        
+
+
         result['entropy'] = fqdn.entropy
 
         return result
@@ -463,17 +474,13 @@ class AttributeManager:
 
         for brand_id,brand in self.trainer_brand.items():
             result[brand + "_brand_lvl_1"] = 0
-            result[brand + "_brand_lvl_2"] = 0
-
+           
             for word in fqdn.words:
                 dist = distance(word,brand)
                 if dist == 1 and len(word) >= 5:
-                    result[brand + "_brand_lvl_1"] = 2
+                    result[brand + "_brand_lvl_1"] = 1
                     fqdn.brand_match[brand] = brand_id 
 
-                elif (dist == 2 and len(brand) > 5):
-                    result[brand + "_brand_lvl_2"] = 1
-                    fqdn.brand_match[brand] = brand_id
-
+              
 
         return result
