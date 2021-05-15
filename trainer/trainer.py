@@ -188,7 +188,7 @@ class AttributeManager:
         self.trainer_topleveldomain = [t.tld  for t in TopLevelDomain.objects.all()]
         self.trainer_keyword = {kw.id:kw.keyword for kw in KeyWord.objects.all()}
         self.trainer_squatedword = [sw.squated_word for sw in SquatedWord.objects.all()]
-      
+      # safe domains
      
         
     def compute_attributes (self,fqdnList,speed=False):
@@ -250,6 +250,7 @@ class AttributeManager:
                 if (brand in fqdn.words):
                     results["{}_brand_dn".format(brand)] = 1
                     fqdn.brand_match[brand] = brand_id
+
                 if(brand == fqdn.subdomain):
                     results["{}_brand_sn".format(brand)] = 1
                     fqdn.brand_match[brand] = brand_id
@@ -264,7 +265,7 @@ class AttributeManager:
         
         """
 
-        Check to see if the fqdn starts with a number
+        Check to see if the fqdn contains  a number
 
         Args:
             fqdn (Fqdn): Fqdn Object
@@ -353,6 +354,7 @@ class AttributeManager:
 
         fqdn.entropy = -sum(count / lngth * math.log(count / lngth, 2) for count in list(p.values()))
         result['entropy'] = fqdn.entropy
+
         return result
        
     def att_count_dashes(self,fqdn):
@@ -415,7 +417,7 @@ class AttributeManager:
             Measures the  the similarity between words commonly associated with phishing and those found in the 
             FQDN. Looks for a max distance of 1
 
-            a distance of 1 would for the word 'WellsFargo' would look like 'W3llsFargo', 'We1lsFargo'
+            a distance of 1 would for the word 'WellsFargo' would look like 'W3llsFargo'
 
         
 
@@ -466,12 +468,12 @@ class AttributeManager:
 
             for word in fqdn.words:
                 dist = distance(word,brand)
-                if dist == 1 and len(word) > 5:
+                if dist == 1 and len(word) >= 5:
                     result[brand + "_brand_lvl_1"] = 2
                     fqdn.brand_match[brand] = brand_id 
 
                 elif (dist == 2 and len(brand) > 5):
-                    result[brand + "_brand_lvl_2"] = 2
+                    result[brand + "_brand_lvl_2"] = 1
                     fqdn.brand_match[brand] = brand_id
 
 

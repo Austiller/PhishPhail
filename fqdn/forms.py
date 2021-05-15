@@ -5,7 +5,7 @@ from django.urls import reverse
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Submit
 
-from .models import FQDNInstance, KeyWord,Brand, SquatedWord
+from .models import FQDN, KeyWord,Brand, SquatedWord
 
 
 

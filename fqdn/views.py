@@ -1,12 +1,11 @@
 from typing import List
 from django.forms.widgets import MultipleHiddenInput
 from django.shortcuts import render
-from fqdn.models import KeyWord,Brand,FQDNInstance
 from django.shortcuts import render, HttpResponse, get_object_or_404, HttpResponseRedirect
 from django.urls import reverse_lazy, reverse
 from django.views.generic import ListView, CreateView, UpdateView,DetailView
 from fqdn.forms import BrandForm, KeyWordForm, KeywordUpdate,SquatedWordForm
-from fqdn.models import FQDNInstance,KeyWord,Brand,SquatedWord
+from fqdn.models import FQDN,KeyWord,Brand,SquatedWord
 # Create your views here.
 from django.template.defaultfilters import slugify
 from taggit.models import Tag
@@ -24,9 +23,9 @@ def csv_all (request):
     response['Content-Disposition'] = 'attachment; filename="fqdnreport.csv"'
     writer = csv.writer(response)
    
-    data = FQDNInstance.objects.all()
+    data = FQDN.objects.all()
     
-    cols = [f.name for f in FQDNInstance._meta.fields]
+    cols = [f.name for f in FQDN._meta.fields]
     writer.writerow(cols)    
     for row in data:
         rowobj = []
@@ -45,7 +44,7 @@ def json_all (request):
    
     j_list = [] 
     
-    for f in FQDNInstance.objects.all():
+    for f in FQDN.objects.all():
        
         j_list.append(f.for_training())
      
@@ -60,9 +59,9 @@ def csv_malicious (request):
     response['Content-Disposition'] = 'attachment; filename="fqdnreport.csv"'
     writer = csv.writer(response)
    
-    data = FQDNInstance.objects.filter(score__gte=0.75)
+    data = FQDN.objects.filter(score__gte=0.75)
     
-    cols = [f.name for f in FQDNInstance._meta.fields]
+    cols = [f.name for f in FQDN._meta.fields]
     writer.writerow(cols)    
     for row in data:
         rowobj = []
@@ -178,7 +177,7 @@ def refresh_brands (request):
     return HttpResponseRedirect(reverse_lazy('view_all_brands')  )
 
 class FQDNInstanceListView(ListView):
-    model = FQDNInstance
+    model = FQDN
     paginate_by = 20        
     context_object_name = 'fqdn_list'
     
@@ -204,11 +203,11 @@ class FQDNInstanceListView(ListView):
         return context
 
     def  get_queryset(self):
-        return FQDNInstance.objects.all().filter(score__gte=0.75)
+        return FQDN.objects.all().filter(score__gte=0.75)
 
 
 class FQDNInstanceDetails (UpdateView):
-    model =  FQDNInstance
+    model =  FQDN
     form_class = FQDNInstanceForm
     context_object_name = 'fqdn'
     template_name = 'fqdn/matched_fqdn_detail.html'

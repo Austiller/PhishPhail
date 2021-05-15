@@ -103,7 +103,7 @@ class DomainPrefix(models.Model):
 
 
 # Change name to FoundFQDN
-class FQDNInstance(models.Model):
+class FQDN(models.Model):
 
   
     fqdn_full = models.CharField(max_length=512,null=True)
