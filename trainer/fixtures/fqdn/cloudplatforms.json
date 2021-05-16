@@ -1,0 +1,1 @@
+[{"model": "fqdn.CloudPlatform", "pk": 0, "fields": {"platform": "azure","slug":"azure"}}, {"model": "fqdn.CloudPlatform", "pk": 1, "fields": {"platform": "amazonaws","slug":"amazonaws"}}]

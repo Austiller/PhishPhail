@@ -5,8 +5,28 @@ from django.urls import reverse
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Submit
 
-from .models import FQDN, KeyWord,Brand, SquatedWord
+from .models import FQDN, KeyWord,Brand, SquatedWord, CloudPlatform
 
+class CloudPlatformForm(forms.ModelForm):
+    #tag = forms.CharField(max_length=128)
+
+    class Meta:
+        model = CloudPlatform
+        fields = [
+            'platform',
+            'tags',
+        ]
+
+    
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.helper = FormHelper()
+        self.helper.form_method = 'POST'
+        self.helper.add_input(Submit('submit', 'Save Cloud Platform'))
+
+    @property
+    def slug_name(self):
+        return 'platform'
 
 
 class KeyWordForm(forms.ModelForm):
@@ -29,6 +49,8 @@ class KeyWordForm(forms.ModelForm):
     @property
     def slug_name(self):
         return 'keyword'
+
+
 class KeywordUpdate(forms.ModelForm):
     #tag = forms.CharField(max_length=128)
 

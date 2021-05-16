@@ -4,8 +4,8 @@ from django.shortcuts import render
 from django.shortcuts import render, HttpResponse, get_object_or_404, HttpResponseRedirect
 from django.urls import reverse_lazy, reverse
 from django.views.generic import ListView, CreateView, UpdateView,DetailView
-from fqdn.forms import BrandForm, KeyWordForm, KeywordUpdate,SquatedWordForm
-from fqdn.models import FQDN,KeyWord,Brand,SquatedWord
+from fqdn.forms import BrandForm, KeyWordForm, SquatedWordForm,CloudPlatformForm
+from fqdn.models import FQDN,KeyWord,Brand,SquatedWord,CloudPlatform
 # Create your views here.
 from django.template.defaultfilters import slugify
 from taggit.models import Tag
@@ -80,7 +80,8 @@ def set_attribute_object(attribute_name):
         return SquatedWord, SquatedWordForm
     elif attribute_name == "KeyWord":
         return KeyWord, KeyWordForm
-
+    elif attribute_name == 'CloudPlatform':
+        return CloudPlatform, CloudPlatformForm
 
 
 def attribute_tags(request,attribute_name, slug):

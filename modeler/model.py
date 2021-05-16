@@ -17,15 +17,15 @@ class Fqdn:
     
     """
 
-    def __init__(self,fqdn,fqdn_type='Unknown',issuing_ca=None,root_ca=None,cert_seen=None,subdomain=None,domain=None,tld=None,score=None):
+    def __init__(self,fqdn,clean_fqdn:str=None,fqdn_type='Unknown',issuing_ca=None,root_ca=None,cert_seen=None,subdomain=None,domain=None,tld=None,score=None):
         self.fqdn_full = fqdn
-        self.fqdn = self.clean_fqdn(fqdn)
+        self.fqdn = clean_fqdn
         self.fqdn_type = fqdn_type
         self.keyword_match = {}
         self.brand_match = {}
         self.squatedWords = {}
         self.issuingCA = None
-        self.rootCA= None
+        self.rootCA= root_ca
         self.dateSeen = None
         self.fqdnParts =  tldextract.extract(fqdn)
         self.words =  re.split('\W+', fqdn)
@@ -34,13 +34,37 @@ class Fqdn:
         self.tld = self.fqdnParts.suffix
         self.score = score
 
+    @classmethod
+    def from_training_set (cls,fqdn_full:str,fqdn_type:str="Unknown"):
+        return Fqdn(fqdn=fqdn_full,clean_fqdn=Fqdn.clean_fqdn(fqdn_full),fqdn_type=fqdn_type)
+
+    @classmethod
+    def from_certstream (cls,fqdn_full:str,fqdn_type:str='Unknown',issue_ca:str=None,root_ca:str=None):
+        """ 
+            Instantiate an FQDN from a certstream
+
+            args:
+                fqdn_full (str): The fqdn found in the stream
+                fqdn_type (str), default 'Unknown': The type of FQDN
+                issue_ca (str): The issuer of the CA
+                root_ca (str): The root CA issuer
+            
+            returns:
+                Fqdn 
+            
+        """
+        fqdn  = cls(fqdn=fqdn_full,clean_fqdn=Fqdn.clean_fqdn(fqdn_full),fqdn_type=fqdn_type,issuing_ca=issue_ca,root_ca=root_ca)
+        return fqdn
+
+    
     def get_type_as_int (self)-> int: 
         if(self.fqdn_type.startswith('m')):
             return 1
         else:
             return 0
-        
-    def clean_fqdn (self,fqdn)-> str: 
+    
+    @staticmethod
+    def clean_fqdn (fqdn)-> str: 
         """ 
         Takes the provided FQDN and removes common subdomains.
 
@@ -53,12 +77,16 @@ class Fqdn:
         """
     
         common_prefixes = ["*", "www", 'www1','www2',"mail", "cpanel", "webmail",
-                        "webdisk", "autodiscover"]
+                        "webdisk", "autodiscover","uat"]
         
-        split_fqdn = fqdn.split(".",1)
-       
-        if(split_fqdn[0] in common_prefixes):
-            return split_fqdn[1]
+        split_fqdn = fqdn.split(".")
+
+        if len(split_fqdn) > 1:
+            fqnd  = ".".join([sf for sf in split_fqdn if sf not in common_prefixes])
+            
+            return fqdn
+            #if(split_fqdn[0] in common_prefixes):
+            #    return split_fqdn[1]
 
         return fqdn
 
@@ -102,20 +130,22 @@ class Modeler:
         
         #Removes wildcard certs and www.* certs
         if message['message_type'] == "certificate_update":
-            csFqdnList = message['data']['leaf_cert']['all_domains']
 
+            csFqdnList = message['data']['leaf_cert']['all_domains']
+           
+            ca_info = message['data']['leaf_cert']['issuer'].get('O','N/A')
 
             for csFqdn in csFqdnList:
-                if csFqdn.startswith('*.') and (csFqdn[2:] in csFqdnList):
+                if csFqdn[:2]== '*.' and (csFqdn[2:] in csFqdnList):
                     csFqdnList.remove(csFqdn)
 
-                elif csFqdn.startswith("www.") and (csFqdn[4:] in csFqdnList):
+                elif csFqdn[4:] == "www." and (csFqdn[4:] in csFqdnList):
                     csFqdnList.remove(csFqdn)
 
 
                
             # 'Convert' found domains to a list Fqdn class. This will make updating the FQDNInstance table easier with the FQDN properties. 
-            csFqdnList = [Fqdn(csFqdn,fqdn_type='unknown') for csFqdn in csFqdnList]
+            csFqdnList = [Fqdn.from_certstream(fqdn_full=csFqdn,fqdn_type='unknown') for csFqdn in csFqdnList]
 
   
             try:
@@ -132,16 +162,17 @@ class Modeler:
                 #update database. 
 
                 csFqdn.score = score
+               
 
-
-                if (csFqdn.score > 0.45 and csFqdn.score < 0.70 ):
+                if (csFqdn.score > 0.45 and csFqdn.score <= 0.70 ):
                     csFqdn.fqdn_type = 'Likely Malicious'
                 elif (csFqdn.score > 0.70):
                     csFqdn.fqdn_type = 'Malicious'
-                elif (csFqdn.score < 0.45 and csFqdn.score > 0.25):
+                elif (csFqdn.score <= 0.45 and csFqdn.score >= 0.25):
                     csFqdn.fqdn_type = 'Likely Benign'
                 else:
                     csFqdn.fqdn_type = 'Benign'
+
 
 
                 fi = FQDNInstance(fqdn_full=csFqdn.fqdn_full,fqdn_tested=csFqdn.fqdn,score=csFqdn.score,entropy=csFqdn.entropy,model_match='linearRegression',fqdn_subdomain=csFqdn.subdomain,fqdn_domain=csFqdn.domain,fqdn_type=csFqdn.fqdn_type)
