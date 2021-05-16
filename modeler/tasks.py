@@ -28,9 +28,7 @@ def start_model(model_id)->int:
     while run:
         c = CertStreamClient(message_callback=m.certstream_handler, url='wss://certstream.calidog.io/', skip_heartbeats=True, on_open=None, on_error=None,)
         c.keep_running = run
-        #c.run_forever(ping_interval=15)
-        cert_thread = Thread(target=c.run_forever,kwargs={"ping_interval":15})
-        cert_thread.start()
+        c.run_forever(ping_interval=15)
         sleep(5)
         run =  SavedModel.objects.get(pk=model_id).model_running
         c.keep_running = run

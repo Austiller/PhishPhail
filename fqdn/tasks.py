@@ -39,11 +39,16 @@ def check_for_matches (fqdn,keywords,brands):
     
     matched_brands = []
     matched_keywords = []
-    
-    f_fqdn, created = FQDN.objects.get_or_create(fqdn_full=fqdn.fqdn_full,fqdn_tested=fqdn.fqdn_tested,score=fqdn.score,fqdn_type=fqdn.fqdn_type,
-                            model_match=fqdn.model_match,fqdn_subdomain=fqdn.fqdn_subdomain,fqdn_domain=fqdn.fqdn_domain)
-    
-    
+    f_fqdn = None
+    created = None
+    try:
+        f_fqdn, created = FQDN.objects.get_or_create(fqdn_full=fqdn.fqdn_full,fqdn_tested=fqdn.fqdn_tested,score=fqdn.score,fqdn_type=fqdn.fqdn_type,
+                                model_match=fqdn.model_match,fqdn_subdomain=fqdn.fqdn_subdomain,fqdn_domain=fqdn.fqdn_domain,entropy=fqdn.entropy)
+        
+    except IntegrityError:
+        fqdn.delete()
+        return 2
+
     if keywords != None:
         matched_keywords = [kw for kw in f_fqdn.check_keyword(keywords)] 
         if len(matched_keywords) > 0:
@@ -59,8 +64,8 @@ def check_for_matches (fqdn,keywords,brands):
         f_fqdn.save()
         update_tags(f_fqdn,matched_keywords,matched_brands)
     
-    if created:
-        fqdn.delete()
+   
+    fqdn.delete()
 
     return 1
 

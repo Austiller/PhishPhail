@@ -106,7 +106,7 @@ Q_CLUSTER = {
 }
 
 WSGI_APPLICATION = 'phishFail.wsgi.application'
-FQDN_THRESHOLD = 0.90
+FQDN_THRESHOLD = 0.25
 
 # Database
 # https://docs.djangoproject.com/en/2.1/ref/settings/#databases

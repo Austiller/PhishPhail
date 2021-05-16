@@ -37,11 +37,8 @@ class Trainer:
         
         """
         self.model_id = model_id
-        #self.version = model_version
-        #self.name = name
-        #self.description = description
         self.attributeManager = AttributeManager()
-        self.fqdnList = [Fqdn(f.fqdn,f.fqdn_type) for f in FQDN.objects.all()]
+        self.fqdnList = [Fqdn.from_training_set(f.fqdn,f.fqdn_type) for f in FQDN.objects.all()]
         self.trainingAttributes = self.attributeManager.compute_attributes(self.fqdnList)
         self.modelDetails = {}
         
@@ -78,8 +75,7 @@ class Trainer:
             "accuracy_test_set": self.modelDetails['accuracy_test_set'],
             "accuracy_precision":    self.modelDetails['accuracy_precision'],
             "accuracy_recall": self.modelDetails['accuracy_recall'],
-            "model_binary":  self.model_binary,
-            "model_attributes ":  pickle.dumps(self.attributeManager) }
+            "model_binary":  self.model_binary }
 
 
     def train_model (self):
@@ -107,7 +103,7 @@ class Trainer:
             attributeDf.values, self.fqdnArr, random_state=2)
 
         #train the model
-        self.model = LogisticRegression(C=10,max_iter=150,solver="sag").fit(self._x_train, self._y_train)
+        self.model = LogisticRegression(C=12,max_iter=150,solver="sag").fit(self._x_train, self._y_train)
         
 
 
@@ -198,7 +194,6 @@ class AttributeManager:
 
        
         for fqdn in fqdnList:
-
             analysis = OrderedDict()
             for item in dir(self):
                 
@@ -246,13 +241,9 @@ class AttributeManager:
                 results["{}_brand_dn".format(brand)] = 0
                 results["{}_brand_sn".format(brand)] = 0
 
-                if (brand in fqdn.words):
-                    results["{}_brand_dn".format(brand)] = 1
-                    fqdn.brand_match[brand] = brand_id
-
-                if(brand == fqdn.subdomain):
-                    results["{}_brand_sn".format(brand)] = 1
-                    fqdn.brand_match[brand] = brand_id
+                for word in fqdn.words:
+                    if brand == word:
+                        results["{}_brand_dn".format(brand)] = 1
 
 
         except Exception as e:
@@ -275,9 +266,11 @@ class AttributeManager:
 
         results = OrderedDict()
 
-        regCheck = re.compile("[A-z]*[0-9]{1,}[A-z]+")
+        regCheck = re.compile("([0-9]+[A-z]*|[A-z]*[0-9]+)")
+        matches = regCheck.findall(fqdn.fqdn)
         
-        results['num_start'] = 1 if regCheck.search(fqdn.fqdn) != None else 0
+    
+        results['num_start'] = 1 if len(matches) > 2 else 0
 
      
 
@@ -323,9 +316,8 @@ class AttributeManager:
             if (kw in fqdn.fqdn):
                 results["{}_kw".format(kw)] = 1
                 fqdn.keyword_match[kw] = kw_id
-            if(kw in fqdn.words):
-                results["{}_kw_fqdn_word".format(kw)] = 1
-                fqdn.keyword_match[kw] = kw_id
+
+           
 
     
         
@@ -353,17 +345,10 @@ class AttributeManager:
 
         fqdn.entropy = -sum(count / lngth * math.log(count / lngth, 2) for count in list(p.values()))
 
-        p, lngth = Counter(fqdn.subdomain), float(len(fqdn.subdomain))
 
-
-        subd_entropy = -sum(count / lngth * math.log(count / lngth, 2) for count in list(p.values()))
-
-        if subd_entropy > fqdn.entropy and subd_entropy > 3.99:
-            fqdn.entropy = 1
         
-
-
         result['entropy'] = fqdn.entropy
+     
 
         return result
        
@@ -382,8 +367,9 @@ class AttributeManager:
         
         dashCount = fqdn.fqdn.count("-")
     
-        result['dashes'] = 0 if dashCount > 2 else dashCount
-       
+        result['dashes'] = 0 
+        if dashCount > 2:
+            result['dashes'] = dashCount
         return result
     
     def att_count_repeating_characters(self,fqdn):
@@ -409,7 +395,7 @@ class AttributeManager:
 
     def att_count_periods(self,fqdn):
         """
-        count the number of dashes in the FQDN with multiple dashes indicating the FQDN is more likely to be associated with phishing. 
+        count the number of periods in the FQDN with multiple dashes indicating the FQDN is more likely to be associated with phishing. 
 
         Args:
             fqdn (Fqdn): Fqdn Object
@@ -428,8 +414,6 @@ class AttributeManager:
             FQDN. Looks for a max distance of 1
 
             a distance of 1 would for the word 'WellsFargo' would look like 'W3llsFargo'
-
-        
 
         Args:
             fqdn (Fqdn):  Fqdn Object
@@ -479,7 +463,7 @@ class AttributeManager:
                 dist = distance(word,brand)
                 if dist == 1 and len(word) >= 5:
                     result[brand + "_brand_lvl_1"] = 1
-                    fqdn.brand_match[brand] = brand_id 
+                    
 
               
 

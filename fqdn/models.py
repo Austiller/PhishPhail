@@ -25,7 +25,7 @@ class Brand(models.Model):
     @property
     def required_fields (self):
         return {"name":"brand_name","tags":"tags"}
-
+    
 class KeyWord(models.Model):
     keyword = models.CharField(max_length=200)
   
@@ -66,6 +66,26 @@ class TopLevelDomain(models.Model):
     def required_fields (self):
         return {"name":"tld","tags":"tags"}
 
+class CloudPlatform (models.Model):
+    """Words that are likely to be typosquated."""
+    platform = models.CharField(max_length=200)
+    slug = models.SlugField(unique=True,max_length=64,null=True)
+    tags = TaggableManager()
+
+
+    def __str__(self):
+        return self.squ
+
+    def __unicode__(self):
+        return self.platform
+    @property
+    def get_slug_name(self):
+        return self.platform
+    @property
+    def required_fields (self):
+        return {"name":"platform","tags":"tags"}
+
+
 class SquatedWord (models.Model):
     """Words that are likely to be typosquated."""
     squated_word = models.CharField(max_length=200)
@@ -84,6 +104,8 @@ class SquatedWord (models.Model):
     @property
     def required_fields (self):
         return {"name":"squated_word","tags":"tags"}
+
+
 class DomainPrefix(models.Model):
     """List of common hosts used by trainer."""
 
