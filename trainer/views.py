@@ -1,8 +1,8 @@
 from django.shortcuts import render, HttpResponse, get_object_or_404, HttpResponseRedirect
 from django.urls import reverse_lazy, reverse
 from django.views.generic import ListView, CreateView, UpdateView,DetailView
-from trainer.forms import ModelForm, FQDNInstanceForm
-from trainer.models import Model, FQDNInstance
+from trainer.forms import ModelForm
+from trainer.models import Model
 import trainer.tasks as tasks
 
 from django.template.defaultfilters import slugify
@@ -41,58 +41,6 @@ class ModelCreateView (CreateView):
     def get_success_url(self):
         return reverse_lazy('models')  
 
-class FQDNInstanceListView(ListView):
-    model = FQDNInstance
-    paginate_by = 20        
-    context_object_name = 'fqdn_list'
-    ordering = ['+date_seen']
-    def get_context_data (self,**kwargs):
-        
-        context = super(FQDNInstanceListView,self).get_context_data(**kwargs)
-       
-        
-        paginator = context['paginator']
-        
-
-        page_numbers_range = 10  
-        start_idx = len(paginator.page_range)
-        page = self.request.GET.get('page')
-        current_page = int(page) if page else 1
-        start_index = int((current_page - 1) / page_numbers_range) * page_numbers_range
-        stop_idx = start_index + page_numbers_range
-        if stop_idx >= start_idx:
-            stop_idx = start_idx
-
-        page_range = paginator.page_range[start_index:stop_idx]
-        context['page_range'] = page_range
-        return context
-
-    def  get_queryset(self):
-        return FQDNInstance.objects.all().filter(score__gte=0.75)
-
-class FQDNInstanceDetails (UpdateView):
-    model =  FQDNInstance
-    form_class = FQDNInstanceForm
-    context_object_name = 'fqdn'
-    template_name = 'trainer/fqdninstance_detail.html'
-    
-   # form_class  = FQDNInstanceForm
-    def get_context_data (self,**kwargs):
-        
-        context = super(FQDNInstanceDetails,self).get_context_data(**kwargs)
-        
-        return context
-
-    def form_valid(self, form):
-        model = form.save(commit=True)
-        model.save()
-
-        # Need to develop a thing that if the model fails to be created it removes the entry
-        
-        return  HttpResponseRedirect(self.get_success_url())
-   
-    def get_success_url(self):
-        return reverse_lazy('training_set')  
 
 def homeView(request):
     context = {}

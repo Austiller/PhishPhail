@@ -1,10 +1,9 @@
-import math, re,tldextract,logging,pickle
-from collections import Counter, OrderedDict
+import  re,tldextract,logging
 #from stringdist import levenshtein
 #from Levenshtein import distance
 from collections import OrderedDict
 from datetime import time
-from trainer.models import  FQDNInstance
+from fqdn.models import FQDN
 from phishFail.settings import FQDN_THRESHOLD
 
 class Fqdn:
@@ -33,6 +32,7 @@ class Fqdn:
         self.domain = self.fqdnParts.domain
         self.tld = self.fqdnParts.suffix
         self.score = score
+        self.entropy = None
 
     @classmethod
     def from_training_set (cls,fqdn_full:str,fqdn_type:str="Unknown"):
@@ -56,7 +56,13 @@ class Fqdn:
         fqdn  = cls(fqdn=fqdn_full,clean_fqdn=Fqdn.clean_fqdn(fqdn_full),fqdn_type=fqdn_type,issuing_ca=issue_ca,root_ca=root_ca)
         return fqdn
 
-    
+    @property
+    def for_dabase (self):
+        #fqdn_full=csFqdn.fqdn,fqdn,score=csFqdn.score,entropy=csFqdn.entropy,model_match='linearRegression',fqdn_subdomain=csFqdn.subdomain,fqdn_domain=csFqdn.domain,fqdn_type=csFqdn.fqdn_type
+
+        #score=csFqdn.score,entropy=csFqdn.entropy,fqdn_subdomain=csFqdn.subdomain,fqdn_domain=csFqdn.domain,fqdn_type=csFqdn.fqdn_type
+        return {"score":self.score,"fqdn_type":self.fqdn_type,"entropy":self.entropy,"fqdn_domain":self.domain,"fqdn_subdomain":self.subdomain}
+        
     def get_type_as_int (self)-> int: 
         if(self.fqdn_type.startswith('m')):
             return 1
@@ -82,11 +88,9 @@ class Fqdn:
         split_fqdn = fqdn.split(".")
 
         if len(split_fqdn) > 1:
-            fqnd  = ".".join([sf for sf in split_fqdn if sf not in common_prefixes])
-            
+            fqdn  = ".".join([sf for sf in split_fqdn if sf not in common_prefixes])
             return fqdn
-            #if(split_fqdn[0] in common_prefixes):
-            #    return split_fqdn[1]
+
 
         return fqdn
 
@@ -162,7 +166,7 @@ class Modeler:
                 #update database. 
 
                 csFqdn.score = score
-               
+
 
                 if (csFqdn.score > 0.45 and csFqdn.score <= 0.70 ):
                     csFqdn.fqdn_type = 'Likely Malicious'
@@ -175,13 +179,23 @@ class Modeler:
 
 
 
-                fi = FQDNInstance(fqdn_full=csFqdn.fqdn_full,fqdn_tested=csFqdn.fqdn,score=csFqdn.score,entropy=csFqdn.entropy,model_match='linearRegression',fqdn_subdomain=csFqdn.subdomain,fqdn_domain=csFqdn.domain,fqdn_type=csFqdn.fqdn_type)
+                new_fqdn,created = FQDN.objects.get_or_create(fqdn_full=csFqdn.fqdn)
                 
-                if csFqdn.score >= FQDN_THRESHOLD:
-                    fi.save()
+                if created:
+                    return new_fqdn
+                else:
+                    if csFqdn.score >= FQDN_THRESHOLD:
+                        
+                        for k,v in csFqdn.for_dabase.items():
+                            setattr(new_fqdn,k,v)
+
+                        
+                        # Match on brands
+                        new_fqdn.save()
+             
 
 
-                return fi
+                    return new_fqdn
 
             
     def execute_model (self,fqdns):

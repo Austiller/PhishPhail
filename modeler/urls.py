@@ -10,7 +10,6 @@ urlpatterns = [
   
     path('<int:pk>/start/',views.start_certstream, name='start_certstream_task'),
     path('<int:pk>/stop/',views.stop_certstream, name='stop_certstream_task'),
-    path('download/All/',views.csv_all,name='download_all'),
-    path('download/Malicious/',views.csv_malicious,name='download_malicious')
+
 
 ]

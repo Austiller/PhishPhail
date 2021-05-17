@@ -1,8 +1,8 @@
+from modeler.model import Fqdn
 from celery import Celery
 from celery import schedules
 from celery.schedules import crontab
 from phishFail.celery import app
-from trainer.models import FQDNInstance as TfqdnInstance
 from threading import Thread
 from fqdn.models import FQDN,KeyWord,Brand
 from django.db.utils import IntegrityError
@@ -39,15 +39,15 @@ def check_for_matches (fqdn,keywords,brands):
     
     matched_brands = []
     matched_keywords = []
-    f_fqdn = None
-    created = None
-    try:
-        f_fqdn, created = FQDN.objects.get_or_create(fqdn_full=fqdn.fqdn_full,fqdn_tested=fqdn.fqdn_tested,score=fqdn.score,fqdn_type=fqdn.fqdn_type,
-                                model_match=fqdn.model_match,fqdn_subdomain=fqdn.fqdn_subdomain,fqdn_domain=fqdn.fqdn_domain,entropy=fqdn.entropy)
+    f_fqdn = fqdn
+   
+    #try:
+    #    f_fqdn, created = FQDN.objects.get_or_create(fqdn_full=fqdn.fqdn_full,fqdn_tested=fqdn.fqdn_tested,score=fqdn.score,fqdn_type=fqdn.fqdn_type,
+                                #model_match=fqdn.model_match,fqdn_subdomain=fqdn.fqdn_subdomain,fqdn_domain=fqdn.fqdn_domain,entropy=fqdn.entropy)
         
-    except IntegrityError:
-        fqdn.delete()
-        return 2
+    #except IntegrityError:
+    #    fqdn.delete()
+    #    return 2
 
     if keywords != None:
         matched_keywords = [kw for kw in f_fqdn.check_keyword(keywords)] 
@@ -65,9 +65,9 @@ def check_for_matches (fqdn,keywords,brands):
         update_tags(f_fqdn,matched_keywords,matched_brands)
     
    
-    fqdn.delete()
+    #fqdn.delete()
 
-    return 1
+    return fqdn
 
 @app.task(name="rematch_brands")
 def rematch_brands (*args):
@@ -91,13 +91,14 @@ def fetch_found_fqdn (*args):
     """
     
     
-    fqdn_list = TfqdnInstance.objects.all()
+    fqdn_list = FQDN.objects.all()
+  
     if len(fqdn_list) < 1:
         return 1
-    keywords = KeyWord.objects.all()#.prefetch_related("tags")
+    keywords = KeyWord.objects.all()
     brands = Brand.objects.all()
     
-
+    
     fqdn_list = [check_for_matches(fqdn,keywords,brands) for fqdn in fqdn_list] 
 
 

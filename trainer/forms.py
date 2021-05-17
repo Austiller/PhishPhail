@@ -31,26 +31,4 @@ class ModelForm(forms.ModelForm):
         self.helper.form_method = 'POST'
         self.helper.add_input(Submit('submit', 'Save Model'))
 
-class FQDNInstanceForm (forms.ModelForm):   
-    
-    fqdn_type = forms.TypedChoiceField(
-        choices = (('Malicious', "Malicious"),('Likely Malicious', "Likely Malicious"),  ("Likely Bengin", "Likely Benign"),("Benign", "Benign")),
-        widget = forms.Select,
-        initial = 'Malicious',
-        required = True,
-    )
-
-    class Meta: 
-        model = FQDNInstance
-        
-        fields = ('fqdn_type',)
-    def __init__ (self,*args,**kwargs):
-        super().__init__(*args,**kwargs)
-        self.helper = FormHelper(self)
-        self.helper.form_show_labels = False
-        self.helper.form_method = 'POST'
-        self.helper.add_input(Submit('submit', 'Save FQDN'))
-       
-
-  
 

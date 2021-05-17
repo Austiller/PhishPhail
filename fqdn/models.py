@@ -1,8 +1,8 @@
-import fqdn
+import fqdn, tldextract,re
 from django.db import models
 # Create your models here.
 from taggit.managers import TaggableManager
-
+from Levenshtein import distance
 from django.db.models import  UniqueConstraint
 
 
@@ -129,15 +129,14 @@ class FQDN(models.Model):
 
   
     fqdn_full = models.CharField(max_length=512,null=True)
-    fqdn_tested =  models.CharField(max_length=512,null=True)
+    
     fqdn_type = models.CharField(max_length=25,null=True)
     score = models.FloatField(null=True,default=0.0)
 
-    model_match = models.CharField(max_length=128,null=True)
+    
     fqdn_subdomain = models.CharField(null=True,max_length=200)
     fqdn_domain = models.CharField(null=True,max_length = 200)
-
-    #for_training = models.BooleanField(default=False,null=True)
+    fqdn_tld = models.CharField(null=True,max_length=6)
     # The date which the FQDN was seen
     date_seen = models.DateTimeField(auto_now_add=True)
     
@@ -152,32 +151,42 @@ class FQDN(models.Model):
     class Meta:
         constraints = [ UniqueConstraint(fields=['fqdn_full'], name='unique_found_fqdn')]
 
-    
+
     def check_keyword(self,keywords):
+     
         for obj in keywords:
-            if obj.keyword.lower() in self.fqdn_subdomain.lower():
-                yield obj
-            elif obj.keyword.lower() in self.fqdn_domain.lower():
-                yield obj
-            else:
+            try:
+                if obj.slug in self.fqdn_subdomain.lower():
+                    yield obj
+                elif obj.slug in self.fqdn_domain.lower():
+                    yield obj
+                else:
+                    continue
+            except Exception:
                 continue
-    
+            
     def check_brand (self,brands):
         for obj in brands:
-      
-            if obj.brand_name.lower() == self.fqdn_subdomain.lower():
-               
-                yield obj
-                
-            elif obj.brand_name.lower() == self.fqdn_domain.lower():
-               
-                
-                yield obj
-            else:
-              
-                
-                continue
+            for word in self.fqdn_words:
+                dist = 0 if len(obj.slug) < 5 else distance(word,obj.slug)
+                if obj.slug == word:
+                    yield obj
+                elif dist == 1:
+                    yield obj
 
+            #if obj.slug == self.fqdn_subdomain.lower():
+               
+             #   yield obj
+                
+            #elif obj.slug == self.fqdn_domain.lower():
+               
+             #   yield obj
+
+            #else:
+                
+                
+             #   continue
+        
 
     def number_dashes(self):
         return 0 if "xn--" in self.fqdn else self.count("-")
@@ -198,18 +207,16 @@ class FQDN(models.Model):
 
     def fqdn_parts(self):
         """Return a dictionary of the FQDN containing Subdomain, domain and TLD"""
-
         fqdn = tldextract.extract(self.fqdn)
         return {"domain":fqdn.domain,"subdomain":fqdn.subdomain,"suffix":fqdn.suffix}
-
+    
+    @property
     def fqdn_words(self):
         """ #Split the domain by non-alphanumeric characters."""
-        return re.split("\W+", self.fqdn)
+        return re.split("\W+", self.fqdn_full)
     
     def __unicode__(self):
-        return self.fqdn
+        return self.fqdn_full
 
     def __str__(self):
-        return self.fqdn
-
-        return
+        return self.fqdn_full

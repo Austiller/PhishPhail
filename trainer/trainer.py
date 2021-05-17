@@ -18,7 +18,7 @@ from collections import OrderedDict, Counter
 
 #from trainer.models import  Brand, TopLevelDomain, SquatedWord, KeyWord
 from modeler.model import Fqdn
-from fqdn.models import KeyWord, TopLevelDomain,SquatedWord,Brand
+from fqdn.models import CloudPlatform, KeyWord, TopLevelDomain,SquatedWord,Brand
 from trainer.models import FQDN
 
 class Trainer:
@@ -183,6 +183,7 @@ class AttributeManager:
         self.trainer_topleveldomain = [t.tld  for t in TopLevelDomain.objects.all()]
         self.trainer_keyword = {kw.id:kw.keyword for kw in KeyWord.objects.all()}
         self.trainer_squatedword = [sw.squated_word for sw in SquatedWord.objects.all()]
+
       # safe domains
      
         
@@ -244,7 +245,7 @@ class AttributeManager:
                 for word in fqdn.words:
                     if brand == word:
                         results["{}_brand_dn".format(brand)] = 1
-
+                        
 
         except Exception as e:
             raise Exception("att_brand")
