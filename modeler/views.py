@@ -7,54 +7,12 @@ from trainer.models import Model
 from modeler.forms import ModelEdit
 from os import system
 from modeler.models import * 
-from trainer.models import FQDNInstance
 import csv
 from modeler.tasks import start_model
 import pickle
 from trainer.tasks import train_model
 from trainer.models import Model as tModel
 
-def csv_all (request):
-
-
-    response = HttpResponse(content_type='text/csv')
-    response['Content-Disposition'] = 'attachment; filename="fqdnreport.csv"'
-    writer = csv.writer(response)
-   
-    data = FQDNInstance.objects.all()
-    
-    cols = [f.name for f in FQDNInstance._meta.fields]
-    writer.writerow(cols)    
-    for row in data:
-        rowobj = []
-        for c in cols:
-            rowobj.append(getattr(row,c))
-
-        writer.writerow(rowobj)
-
-    return response
-
-
-def csv_malicious (request):
-
-    
-
-    response = HttpResponse(content_type='text/csv')
-    response['Content-Disposition'] = 'attachment; filename="fqdnreport.csv"'
-    writer = csv.writer(response)
-   
-    data = FQDNInstance.objects.filter(score__gte=0.75)
-    
-    cols = [f.name for f in FQDNInstance._meta.fields]
-    writer.writerow(cols)    
-    for row in data:
-        rowobj = []
-        for c in cols:
-            rowobj.append(getattr(row,c))
-
-        writer.writerow(rowobj)
-
-    return response
 
 
 class ModelDeleteView  (DeleteView):
@@ -131,14 +89,7 @@ def start_certstream (request, pk):
     modeler_task.task=pickle.dumps(task)
     modeler_task.status="RUNNING"
     modeler_task.save()
-    
 
-    #Check if Model is already running
-    #currentTask = CertStreamTask.objects.get(model_id=pk,is_running=True)
-
-        
-    #ml = ModelListView()
-    
     
     return HttpResponseRedirect(reverse('models'))
 

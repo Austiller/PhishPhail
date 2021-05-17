@@ -32,6 +32,6 @@ def start_model(model_id)->int:
         sleep(5)
         run =  SavedModel.objects.get(pk=model_id).model_running
         c.keep_running = run
-    
-    
+        
+
     return model_id

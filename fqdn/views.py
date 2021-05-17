@@ -10,7 +10,7 @@ from fqdn.models import FQDN,KeyWord,Brand,SquatedWord,CloudPlatform
 from django.template.defaultfilters import slugify
 from taggit.models import Tag
 from fqdn import models
-from trainer.forms import FQDNInstanceForm
+from fqdn.forms import FQDNInstanceForm
 from fqdn.tasks import rematch_brands,rematch_keywords
 import csv,json
 from django.http import JsonResponse
