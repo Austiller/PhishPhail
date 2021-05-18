@@ -10,10 +10,10 @@ from fqdn.models import FQDN,KeyWord,Brand,SquatedWord,CloudPlatform
 from django.template.defaultfilters import slugify
 from taggit.models import Tag
 from fqdn import models
-from fqdn.forms import FQDNInstanceForm
+from fqdn.forms import FQDNInstanceForm,DeleteForm
 from fqdn.tasks import rematch_brands,rematch_keywords
 import csv,json
-from django.http import JsonResponse
+from django.http import JsonResponse, request
 
 
 def csv_all (request):
@@ -83,6 +83,28 @@ def set_attribute_object(attribute_name):
     elif attribute_name == 'CloudPlatform':
         return CloudPlatform, CloudPlatformForm
 
+def attribute_delete  (request,attribute_name, slug):
+    context = {}
+    att,form = set_attribute_object(attribute_name)
+    
+    context['object'] = get_object_or_404(att,slug=slug)
+    context['object_name'] = attribute_name
+    template_name =  'fqdn/attribute_delete.html'
+    
+    if request.method == "POST":
+        form = DeleteForm(request.POST)
+
+        if form.is_valid():               
+            context['object'].delete()
+            
+        else:
+       
+            return HttpResponse(form.errors)
+
+    else:
+        render(request,template_name,context)
+
+    HttpResponseRedirect(reverse_lazy('attribute_list',kwargs={'attribute_name':attribute_name})  )
 
 def attribute_tags(request,attribute_name, slug):
     tag = get_object_or_404(Tag, slug=slug)
@@ -165,7 +187,7 @@ def attribute_list (request,attribute_name):
                 rematch_keywords.delay()
 
         else:
-            input(form.errors)
+          
             return HttpResponse(form.errors)
  
     return render(request, 'fqdn/attribute_lists.html', context)

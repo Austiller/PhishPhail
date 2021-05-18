@@ -28,8 +28,10 @@ def update_tags (fqdn,matched_keywords=None,matched_brands=None):
 
         fqdn.tags.add(*tags)
     try:
-        
-        fqdn.save()
+        if len(matched_brands) > 1:
+            fqdn.save()
+        else:
+            fqdn.delete()
     except IntegrityError:
         pass
     
