@@ -30,7 +30,10 @@ class FQDNInstanceForm (forms.ModelForm):
         self.helper.add_input(Submit('submit', 'Save FQDN'))
        
 
-  
+class DeleteForm(forms.Form): #Note that it is not inheriting from forms.ModelForm
+    slug = forms.CharField(required=False,max_length=256)
+
+
 
 class CloudPlatformForm(forms.ModelForm):
     #tag = forms.CharField(max_length=128)

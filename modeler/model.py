@@ -188,7 +188,7 @@ class Modeler:
                         
                         for k,v in csFqdn.for_dabase.items():
                             setattr(new_fqdn,k,v)
-
+                            
                         
                         # Match on brands
                         new_fqdn.save()

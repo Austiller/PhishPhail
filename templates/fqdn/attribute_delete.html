@@ -1,0 +1,31 @@
+
+
+
+{% extends "base.html" %}
+
+{% load crispy_forms_tags %}
+
+
+
+{% block content %}
+
+  <div class="d-flex flex-column align-items-md-center justify-content-center w-100 p-3">
+   <form method="post" >
+    {% csrf_token %}
+
+
+      <form method="post">{% csrf_token %}
+        {{form.as_p}}
+        <p id="slug" >Are you sure you want to delete the {{object_name}} <b>{{ object.slug|title }}</b>?</p>
+        
+        <input type="submit" value="Confirm">
+        <a href="{% url 'attribute_list' object_name %}" role="button" class="p-3">Cancel</a>
+
+    </form>
+   
+
+   
+{% endblock %}
+
+
+

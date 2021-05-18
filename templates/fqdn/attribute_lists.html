@@ -17,6 +17,7 @@
             <form method="POST">
                 {% csrf_token %}
                 <div class="form-group">
+                 
                     <label>{{object_name}}</label>
                     <input type="text" class="form-control" name={{required_fields.name}} placeholder={{required_fields.name}}>
                     
@@ -38,7 +39,11 @@
                     <div class="col-md-6">
 
                         <div class="col d-flex flex-column ">
-                            <h4 class="my-1"><a href="{% url 'attribute_details' object_name object.slug %}">{{object.slug|title}}</a></h4>
+                            <div class="d-flex">
+                                <h4 class="my-1"><a href="{% url 'attribute_details' object_name object.slug %}">{{object.slug|title}}</a></h4>
+                                <a class="icon-trash" id="delete-object"   href="{% url 'attribute_delete' object_name object.slug %}">x</a>
+                              
+                            </div>
                             <div style="display:flex">
                                 {% for tag in object.tags.all %}
                                 <a href="{% url 'attribute_tags' object_name tag.slug %}" class="mr-1 badge badge-info">#{{ tag|title }}</a>
