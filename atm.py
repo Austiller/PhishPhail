@@ -45,20 +45,38 @@ import math
 from collections import OrderedDict, Counter
 from Levenshtein import distance
 import tldextract
-
 class AttributeManager:
-    def __init__(self, known_brands, suspicious_keywords, phishing_tlds):
-        self.known_brands = known_brands  # List of known brand domains
-        self.suspicious_keywords = suspicious_keywords  # Keywords to detect phishing
-        self.phishing_tlds = phishing_tlds  # List of suspicious TLDs
+    """
+    Attribute Manager for phishing analysis.
+    Fetches data like brands, TLDs, keywords, and squatted words from a PostgreSQL database
+    and computes features for email sender, subject, and body content.
+    """
+    def __init__(self, conn):
+        self.conn = conn
+        self.cursor = conn.cursor()
+
+        # Fetch relevant data from database
+        self.trainer_brand = self.fetch_data("SELECT brand_name FROM brand_table;")
+        self.trainer_topleveldomain = self.fetch_data("SELECT tld FROM topleveldomain_table;")
+        self.trainer_keyword = self.fetch_data("SELECT keyword FROM keyword_table;")
+        self.trainer_squatedword = self.fetch_data("SELECT squated_word FROM squatedword_table;")
+
+    def fetch_data(self, query):
+        """
+        Execute a query and return results as a list.
+        """
+        self.cursor.execute(query)
+        return [row[0] for row in self.cursor.fetchall()]
 
     def compute_attributes(self, email_data):
         """
-        Compute all features for a given email message.
+        Compute all features for a given email.
+        
         Args:
             email_data (dict): Dictionary containing sender, subject, and body.
+            
         Returns:
-            OrderedDict: Computed attributes for the email.
+            OrderedDict: Features computed for the given email.
         """
         attributes = OrderedDict()
         attributes.update(self.att_sender_email(email_data['sender']))
@@ -66,56 +84,84 @@ class AttributeManager:
         attributes.update(self.att_email_body(email_data['body']))
         return attributes
 
+    # ===== Sender Email Attributes ===== #
     def att_sender_email(self, sender):
-        """Extract features from sender email."""
+        """
+        Compute features related to the sender email address.
+        """
         results = OrderedDict()
-        domain = tldextract.extract(sender).domain
-        tld = tldextract.extract(sender).suffix
+        domain_data = tldextract.extract(sender)
+        domain = domain_data.domain
+        tld = domain_data.suffix
 
         # Domain entropy
         p, length = Counter(domain), len(domain)
         entropy = -sum(count / length * math.log(count / length, 2) for count in p.values())
         results['sender_domain_entropy'] = entropy
 
-        # TLD check
-        results['suspicious_tld'] = 1 if tld in self.phishing_tlds else 0
+        # Suspicious TLD check
+        results['suspicious_tld'] = 1 if tld in self.trainer_topleveldomain else 0
 
-        # Brand similarity
-        results['brand_similarity'] = any(distance(domain, brand) <= 2 for brand in self.known_brands)
+        # Similarity to known brands
+        results['brand_similarity'] = any(distance(domain, brand) <= 2 for brand in self.trainer_brand)
 
-        # Contains numbers/hyphens
+        # Numbers and hyphens in domain
         results['contains_number'] = int(bool(re.search(r'\d', domain)))
         results['contains_hyphen'] = int('-' in domain)
 
         return results
 
+    # ===== Subject Line Attributes ===== #
     def att_subject_line(self, subject):
-        """Extract features from subject line."""
+        """
+        Compute features related to the subject line.
+        """
         results = OrderedDict()
+
+        # Check if subject is all uppercase
         results['subject_all_caps'] = int(subject.isupper())
+
+        # Subject length
         results['subject_length'] = len(subject)
+
+        # Number of exclamation marks
         results['exclamation_count'] = subject.count('!')
-        
-        # Keyword detection
+
+        # Contains phishing keywords
         results['contains_phishing_keyword'] = any(
-            kw.lower() in subject.lower() for kw in self.suspicious_keywords
+            kw.lower() in subject.lower() for kw in self.trainer_keyword
         )
+
         return results
 
+    # ===== Email Body Content Attributes ===== #
     def att_email_body(self, body):
-        """Extract features from email body content."""
+        """
+        Compute features related to the email body.
+        """
         results = OrderedDict()
+
+        # Body length
         results['body_length'] = len(body)
+
+        # Number of URLs
         results['url_count'] = len(re.findall(r'https?://\S+', body))
+
+        # HTML flag
         results['html_flag'] = int(bool(re.search(r'<.*?>', body)))
 
         # Keyword frequency
         results['phishing_keyword_count'] = sum(
-            body.lower().count(kw.lower()) for kw in self.suspicious_keywords
+            body.lower().count(kw.lower()) for kw in self.trainer_keyword
         )
 
-        return results
+        # Squatted words detection
+        squated_word_flag = any(
+            distance(word, sw) <= 1 for sw in self.trainer_squatedword for word in body.split()
+        )
+        results['contains_squated_words'] = int(squated_word_flag)
 
+        return results
 sample_email = {
     "sender": "support@paypa1.com",
     "subject": "URGENT: Your account has been suspended!!!",
