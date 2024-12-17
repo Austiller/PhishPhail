@@ -116,6 +116,12 @@ class AttributeManager:
 
         return results
 
+sample_email = {
+    "sender": "support@paypa1.com",
+    "subject": "URGENT: Your account has been suspended!!!",
+    "body": "Dear user, click here to verify your account: https://bit.ly/3random"
+}
+
 known_brands = ["paypal", "amazon", "microsoft"]
 phishing_tlds = ["xyz", "info", "top"]
 suspicious_keywords = ["urgent", "verify", "suspended", "click here", "update"]
