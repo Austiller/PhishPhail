@@ -45,6 +45,61 @@ import math
 from collections import OrderedDict, Counter
 from Levenshtein import distance
 import tldextract
+
+import json
+import pandas as pd
+from sqlalchemy import create_engine
+
+class FixtureLoader:
+    """
+    Loads data from Django fixture exports (JSON format) into a PostgreSQL database.
+    Utilizes Pandas DataFrames for efficient table creation and bulk insertion.
+    """
+    def __init__(self, db_config):
+        """
+        Initialize the PostgreSQL connection using SQLAlchemy.
+
+        Args:
+            db_config (dict): A dictionary with database connection parameters.
+        """
+        db_url = f"postgresql://{db_config['user']}:{db_config['password']}@{db_config['host']}:{db_config['port']}/{db_config['dbname']}"
+        self.engine = create_engine(db_url)
+
+    def load_fixture(self, fixture_path):
+        """
+        Load data from a Django JSON fixture file into PostgreSQL.
+
+        Args:
+            fixture_path (str): Path to the Django fixture JSON file.
+        """
+        # Load fixture JSON file
+        with open(fixture_path, 'r') as file:
+            data = json.load(file)
+        
+        # Parse the JSON and organize data into tables
+        tables = {}
+        for entry in data:
+            table_name = entry['model'].split('.')[-1]  # Extract table name
+            fields = entry['fields']
+            fields['id'] = entry['pk']  # Add primary key
+
+            if table_name not in tables:
+                tables[table_name] = []
+            tables[table_name].append(fields)
+
+        # Convert each table's data into a Pandas DataFrame and save to PostgreSQL
+        for table_name, records in tables.items():
+            df = pd.DataFrame(records)
+            # Save to database (creates table if not exists, appends data)
+            df.to_sql(name=table_name, con=self.engine, if_exists='append', index=False)
+            print(f"Data loaded into table '{table_name}'.")
+
+    def close(self):
+        """Close the SQLAlchemy engine."""
+        self.engine.dispose()
+        print("Database connection closed.")
+
+
 class AttributeManager:
     """
     Attribute Manager for phishing analysis.
