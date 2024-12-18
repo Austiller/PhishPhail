@@ -100,11 +100,17 @@ class FixtureLoader:
         print("Database connection closed.")
 
 
+import re
+import math
+from collections import OrderedDict, Counter
+from Levenshtein import distance
+import tldextract
+
 class AttributeManager:
     """
     Attribute Manager for phishing analysis.
-    Fetches data like brands, TLDs, keywords, and squatted words from a PostgreSQL database
-    and computes features for email sender, subject, and body content.
+    Computes features for email sender, subject, and body content, including
+    a comparison between labeled sender names and actual sender email addresses.
     """
     def __init__(self, conn):
         self.conn = conn
@@ -134,15 +140,22 @@ class AttributeManager:
             OrderedDict: Features computed for the given email.
         """
         attributes = OrderedDict()
-        attributes.update(self.att_sender_email(email_data['sender']))
+        attributes.update(self.att_sender_email(email_data['sender'], email_data['labeled_sender']))
         attributes.update(self.att_subject_line(email_data['subject']))
         attributes.update(self.att_email_body(email_data['body']))
         return attributes
 
     # ===== Sender Email Attributes ===== #
-    def att_sender_email(self, sender):
+    def att_sender_email(self, sender, labeled_sender):
         """
-        Compute features related to the sender email address.
+        Compute features related to the sender email address and labeled sender.
+
+        Args:
+            sender (str): Actual sender email address.
+            labeled_sender (str): Labeled sender name from the email header.
+
+        Returns:
+            OrderedDict: Features for sender email.
         """
         results = OrderedDict()
         domain_data = tldextract.extract(sender)
@@ -163,6 +176,38 @@ class AttributeManager:
         # Numbers and hyphens in domain
         results['contains_number'] = int(bool(re.search(r'\d', domain)))
         results['contains_hyphen'] = int('-' in domain)
+
+        # Compare labeled sender vs actual sender email
+        results.update(self.att_sender_mismatch(labeled_sender, domain))
+
+        return results
+
+    def att_sender_mismatch(self, labeled_sender, email_domain):
+        """
+        Compare the labeled sender name to the actual sender's email domain.
+
+        Args:
+            labeled_sender (str): The labeled sender name (e.g., "PayPal Support").
+            email_domain (str): The domain extracted from the sender email (e.g., "paypa1").
+
+        Returns:
+            OrderedDict: Features comparing labeled sender to the email domain.
+        """
+        results = OrderedDict()
+
+        # Normalize labeled sender (lowercase, no special characters)
+        normalized_labeled_sender = re.sub(r'[^a-zA-Z0-9]', '', labeled_sender.lower())
+        normalized_email_domain = email_domain.lower()
+
+        # Levenshtein distance between labeled sender and email domain
+        results['sender_name_distance'] = distance(normalized_labeled_sender, normalized_email_domain)
+
+        # Exact match flag
+        results['sender_name_exact_match'] = int(normalized_labeled_sender == normalized_email_domain)
+
+        # Partial match (substring containment)
+        results['sender_name_partial_match'] = int(normalized_labeled_sender in normalized_email_domain or 
+                                                   normalized_email_domain in normalized_labeled_sender)
 
         return results
 
@@ -217,6 +262,7 @@ class AttributeManager:
         results['contains_squated_words'] = int(squated_word_flag)
 
         return results
+
 sample_email = {
     "sender": "support@paypa1.com",
     "subject": "URGENT: Your account has been suspended!!!",
