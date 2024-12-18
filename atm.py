@@ -106,11 +106,12 @@ from collections import OrderedDict, Counter
 from Levenshtein import distance
 import tldextract
 
+
 class AttributeManager:
     """
     Attribute Manager for phishing analysis.
-    Computes features for email sender, subject, and body content, including
-    a comparison between labeled sender names and actual sender email addresses.
+    Computes features for email sender, subject, and body content, and processes
+    JSON representations of EmailMessage instances.
     """
     def __init__(self, conn):
         self.conn = conn
@@ -129,33 +130,36 @@ class AttributeManager:
         self.cursor.execute(query)
         return [row[0] for row in self.cursor.fetchall()]
 
-    def compute_attributes(self, email_data):
+    def compute_attributes(self, email_json):
         """
-        Compute all features for a given email.
-        
+        Compute all features for a given email JSON.
+
         Args:
-            email_data (dict): Dictionary containing sender, subject, and body.
-            
+            email_json (dict): JSON representation of an EmailMessage instance.
+
         Returns:
             OrderedDict: Features computed for the given email.
         """
         attributes = OrderedDict()
-        attributes.update(self.att_sender_email(email_data['sender'], email_data['labeled_sender']))
-        attributes.update(self.att_subject_line(email_data['subject']))
-        attributes.update(self.att_email_body(email_data['body']))
+
+        # Extract JSON fields
+        sender = email_json.get('sender', {}).get('email', "")
+        labeled_sender = email_json.get('sender', {}).get('name', "")
+        subject = email_json.get('subject', "")
+        body = email_json.get('body', "")
+        links = email_json.get('links', [])
+
+        # Compute attributes from various parts of the email
+        attributes.update(self.att_sender_email(sender, labeled_sender))
+        attributes.update(self.att_subject_line(subject))
+        attributes.update(self.att_email_body(body, links))
+
         return attributes
 
     # ===== Sender Email Attributes ===== #
     def att_sender_email(self, sender, labeled_sender):
         """
         Compute features related to the sender email address and labeled sender.
-
-        Args:
-            sender (str): Actual sender email address.
-            labeled_sender (str): Labeled sender name from the email header.
-
-        Returns:
-            OrderedDict: Features for sender email.
         """
         results = OrderedDict()
         domain_data = tldextract.extract(sender)
@@ -185,13 +189,6 @@ class AttributeManager:
     def att_sender_mismatch(self, labeled_sender, email_domain):
         """
         Compare the labeled sender name to the actual sender's email domain.
-
-        Args:
-            labeled_sender (str): The labeled sender name (e.g., "PayPal Support").
-            email_domain (str): The domain extracted from the sender email (e.g., "paypa1").
-
-        Returns:
-            OrderedDict: Features comparing labeled sender to the email domain.
         """
         results = OrderedDict()
 
@@ -206,8 +203,10 @@ class AttributeManager:
         results['sender_name_exact_match'] = int(normalized_labeled_sender == normalized_email_domain)
 
         # Partial match (substring containment)
-        results['sender_name_partial_match'] = int(normalized_labeled_sender in normalized_email_domain or 
-                                                   normalized_email_domain in normalized_labeled_sender)
+        results['sender_name_partial_match'] = int(
+            normalized_labeled_sender in normalized_email_domain or 
+            normalized_email_domain in normalized_labeled_sender
+        )
 
         return results
 
@@ -235,7 +234,7 @@ class AttributeManager:
         return results
 
     # ===== Email Body Content Attributes ===== #
-    def att_email_body(self, body):
+    def att_email_body(self, body, links):
         """
         Compute features related to the email body.
         """
@@ -245,7 +244,7 @@ class AttributeManager:
         results['body_length'] = len(body)
 
         # Number of URLs
-        results['url_count'] = len(re.findall(r'https?://\S+', body))
+        results['url_count'] = len(links)
 
         # HTML flag
         results['html_flag'] = int(bool(re.search(r'<.*?>', body)))
